@@ -28,6 +28,7 @@ public class JiraService {
     @Autowired
     private TicketRepository ticketRepository;
 
+    
 
     private HttpHeaders createHeaders() {
         String auth = jiraUsername + ":" + jiraApiToken;
