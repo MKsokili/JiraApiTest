@@ -1,16 +1,12 @@
-package com.example.jiratestapi.Jira;
+package com.example.jiratestapi.Tasks;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
-import io.micrometer.common.lang.Nullable;
-import jakarta.annotation.Generated;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import com.example.jiratestapi.Batch.Batch;
+import com.example.jiratestapi.Projects.Project;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,12 +17,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ticket {
+public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String jiraId;
-    private String projectKey;
     private String title;
     private String summary;
     private String description;
@@ -34,10 +29,17 @@ public class Ticket {
 
     private LocalDateTime created;
     private LocalDateTime updated;
+    private String assigneeName; //Changement de champ pour inclure le nom de l'assignee
 
     private Integer storyPoints;
 
-    private String assigneeName; // Changement de champ pour inclure le nom de l'assignee
 
+    private ActionType action_type;
+    private Date action_date;
+    @ManyToOne
+    @JoinColumn(name = "batch_id")
+    private Batch batch  ;
 
+    @ManyToOne
+    private Project project;
 }

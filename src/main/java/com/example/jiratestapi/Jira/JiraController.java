@@ -1,5 +1,6 @@
 package com.example.jiratestapi.Jira;
 
+import com.example.jiratestapi.Tasks.Task;
 import lombok.AllArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,14 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.transaction.Transactional;
 
-import java.lang.reflect.Executable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -54,24 +52,25 @@ public class JiraController {
     }
 
     @GetMapping("/tickets")
-    public List<Ticket> getTickets() throws Exception {
+    public List<Task> getTickets() throws Exception {
         return jiraService.fetchTickets();
     }
 
     @GetMapping("/mine")
-    public List<Ticket> getMyTickets() throws Exception {
+    public List<Task> getMyTickets() throws Exception {
         return jiraService.fetchTicketsAssignedToMyEmail();
     }
 
     @GetMapping("/fetchByProject/{projectKey}")
-    public List<Ticket> getMyProjectTickets(@PathVariable String projectKey) throws Exception {
+    public List<Task> getMyProjectTickets(@PathVariable String projectKey) throws Exception {
         return jiraService.fetchTicketsByProject(projectKey);
     }
 
     @Transactional
     @PostMapping("/sync")
     public ResponseEntity<String> syncTickets() throws Exception {
-        List<Ticket> tickets = jiraService.fetchTickets();
+
+        List<Task> tickets = jiraService.fetchTickets();
 
         int countUpdatedTickets = 0;
         int countCreatedTickets = 0 ;
@@ -80,12 +79,12 @@ public class JiraController {
 
         // Récupération des jiraIds des tickets obtenus depuis Jira
         List<String> jiraIds = tickets.stream()
-                                      .map(Ticket::getJiraId)
+                                      .map(Task::getJiraId)
                                       .collect(Collectors.toList());
 
         // Récupération des tickets existants dans la base de données qui ne sont plus présents dans Jira
-        List<Ticket> ticketsInDatabase = ticketRepository.findAll();
-        List<Ticket> ticketsToDelete = ticketsInDatabase.stream()
+        List<Task> ticketsInDatabase = ticketRepository.findAll();
+        List<Task> ticketsToDelete = ticketsInDatabase.stream()
                                                         .filter(ticket -> !jiraIds.contains(ticket.getJiraId()))
                                                         .collect(Collectors.toList());
 
@@ -95,11 +94,11 @@ public class JiraController {
         ticketRepository.deleteAll(ticketsToDelete);                                               
         
         // Sauvegarde des tickets dans la base de données
-        for (Ticket ticket : tickets) {
-            Optional<Ticket> existingTicket = ticketRepository.findByJiraId(ticket.getJiraId());
+        for (Task ticket : tickets) {
+            Optional<Task> existingTicket = ticketRepository.findByJiraId(ticket.getJiraId());
             if (existingTicket.isPresent()) {
                 // Si le ticket existe déjà, vous pouvez le mettre à jour si nécessaire
-                Ticket ticketToUpdate = existingTicket.get();
+                Task ticketToUpdate = existingTicket.get();
                 ticketToUpdate.setProjectKey(ticket.getProjectKey());
                 ticketToUpdate.setTitle(ticket.getTitle());
                 ticketToUpdate.setSummary(ticket.getSummary());

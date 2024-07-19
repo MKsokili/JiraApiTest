@@ -1,5 +1,6 @@
 package com.example.jiratestapi.Jira;
 
+import com.example.jiratestapi.Tasks.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -10,11 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,7 +132,7 @@ public class JiraService {
     // }
 
 
-    public List<Ticket> fetchTickets() throws Exception {
+    public List<Task> fetchTickets() throws Exception {
         String url = jiraBaseUrl + "/search?jql=";
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
@@ -145,9 +144,10 @@ public class JiraService {
     
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
-        List<Ticket> tickets = new ArrayList<>();
+        List<Task> tickets = new ArrayList<>();
         for (JsonNode issue : issues) {
-            Ticket ticket = new Ticket();
+            Task ticket = new Task();
+
             ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
             ticket.setJiraId(issue.get("id").asText());
             ticket.setTitle(issue.get("fields").get("summary").asText());
@@ -193,12 +193,12 @@ public class JiraService {
     }
     
 
-    public List<Ticket> fetchTicketsAssignedToMyEmail() throws Exception {
+    public List<Task> fetchTicketsAssignedToMyEmail() throws Exception {
         // Récupération de l'email de l'utilisateur actuel (supposant que l'authentification est configurée)
         String currentUserEmail = "Chaimae Rachdi";
 
         // Récupération des tickets assignés à l'email de l'utilisateur actuel
-        List<Ticket> allTickets = fetchTickets();
+        List<Task> allTickets = fetchTickets();
         return allTickets.stream()
                          .filter(ticket -> currentUserEmail.equals(ticket.getAssigneeName()))
                          .collect(Collectors.toList());
@@ -206,7 +206,7 @@ public class JiraService {
 
 
 
-    public List<Ticket> fetchTicketsByProject(String projectKey) throws Exception {
+    public List<Task> fetchTicketsByProject(String projectKey) throws Exception {
         String url = jiraBaseUrl + "/search?jql=project=";
         String urlProject = url+projectKey;
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
@@ -219,9 +219,9 @@ public class JiraService {
     
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
-        List<Ticket> tickets = new ArrayList<>();
+        List<Task> tickets = new ArrayList<>();
         for (JsonNode issue : issues) {
-            Ticket ticket = new Ticket();
+            Task ticket = new Task();
             ticket.setProjectKey(projectKey);
             ticket.setJiraId(issue.get("id").asText());
             ticket.setTitle(issue.get("fields").get("summary").asText());
