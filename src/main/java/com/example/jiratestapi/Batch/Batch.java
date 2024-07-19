@@ -18,7 +18,7 @@ public class Batch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Date start_date;
-    private Boolean  isCompleted;
+    private Boolean  is_completed;
     //add errors fields and statistiques and so
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, orphanRemoval = true)
 

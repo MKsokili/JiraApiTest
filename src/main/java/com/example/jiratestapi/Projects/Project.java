@@ -1,6 +1,7 @@
 package com.example.jiratestapi.Projects;
 
 import com.example.jiratestapi.Batch.Batch;
+import com.example.jiratestapi.Tasks.Issue;
 import com.example.jiratestapi.Tasks.Task;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private  List<Batch> Batches;
     @OneToMany(mappedBy = "project")
-    List<Task> tasks;
+    List<Issue> issues;
 
 
 
