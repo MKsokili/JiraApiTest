@@ -1,5 +1,7 @@
 package com.example.jiratestapi.Jira;
 
+import com.example.jiratestapi.Projects.Project;
+import com.example.jiratestapi.Projects.ProjectRepository;
 import com.example.jiratestapi.Tasks.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -26,6 +28,10 @@ public class JiraService {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
 
     
 
@@ -147,8 +153,8 @@ public class JiraService {
         List<Task> tickets = new ArrayList<>();
         for (JsonNode issue : issues) {
             Task ticket = new Task();
-
-            ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
+            Project project = projectRepository.findByJira_key(issue.get("fields").get("project").get("key").asText());
+            ticket.setProject(project);
             ticket.setJiraId(issue.get("id").asText());
             ticket.setTitle(issue.get("fields").get("summary").asText());
             ticket.setSummary(issue.get("fields").get("summary").asText());
@@ -222,7 +228,8 @@ public class JiraService {
         List<Task> tickets = new ArrayList<>();
         for (JsonNode issue : issues) {
             Task ticket = new Task();
-            ticket.setProjectKey(projectKey);
+            Project project = projectRepository.findByJira_key(projectKey);
+            ticket.setProject(project);
             ticket.setJiraId(issue.get("id").asText());
             ticket.setTitle(issue.get("fields").get("summary").asText());
             ticket.setSummary(issue.get("fields").get("summary").asText());

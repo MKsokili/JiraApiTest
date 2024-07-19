@@ -99,7 +99,7 @@ public class JiraController {
             if (existingTicket.isPresent()) {
                 // Si le ticket existe déjà, vous pouvez le mettre à jour si nécessaire
                 Task ticketToUpdate = existingTicket.get();
-                ticketToUpdate.setProjectKey(ticket.getProjectKey());
+                ticketToUpdate.setProject(ticket.getProject());
                 ticketToUpdate.setTitle(ticket.getTitle());
                 ticketToUpdate.setSummary(ticket.getSummary());
                 ticketToUpdate.setDescription(ticket.getDescription());
