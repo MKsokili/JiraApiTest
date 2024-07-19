@@ -13,7 +13,7 @@ import java.util.List;
 public class Project {
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String jira_key;
+    private String jiraKey;
     private String name;
 
     @OneToMany(mappedBy = "project")

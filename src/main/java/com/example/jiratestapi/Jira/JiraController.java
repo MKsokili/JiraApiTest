@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 public class JiraController {
     JiraService jiraService;
 
-    @Autowired
     private TicketRepository ticketRepository;
     @GetMapping("/create")
     public ResponseEntity<String> createIssue(){

@@ -1,5 +1,6 @@
 package com.example.jiratestapi.Batch;
 
+import com.example.jiratestapi.Projects.Project;
 import com.example.jiratestapi.Tasks.Issue;
 import com.example.jiratestapi.Tasks.Task;
 import jakarta.persistence.*;
@@ -20,8 +21,9 @@ public class Batch {
     private Date start_date;
     private Boolean  is_completed;
     //add errors fields and statistiques and so
-    @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, orphanRemoval = true)
-
+    @OneToMany(mappedBy = "batch")
     private List<Task> tasks ;
+    @ManyToOne
+    private Project project;
 
 }

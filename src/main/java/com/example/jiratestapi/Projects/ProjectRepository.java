@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project , Long>{
-    Project findByJira_key(String jira_key);
+   Project findByJiraKey(String jirakey);
 }
