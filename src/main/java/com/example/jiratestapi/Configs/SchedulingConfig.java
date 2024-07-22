@@ -33,7 +33,7 @@ public class SchedulingConfig {
     private TaskRepository taskRepository;
 
     // @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(cron = "0 */1 * * * ?")
+//    @Scheduled(cron = "0 */1 * * * ?")
     public void syncTicketsNightly() throws Exception {
        List<BatchTicket> tasks= ticketController.syncTickets();
 
