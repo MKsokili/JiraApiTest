@@ -3,12 +3,9 @@ package com.example.jiratestapi.Jira;
 import com.example.jiratestapi.Projects.Project;
 import com.example.jiratestapi.Projects.ProjectRepository;
 import com.example.jiratestapi.SyncAuth.SyncAuth;
-import com.example.jiratestapi.SyncAuth.SyncAuthRepository;
 import com.example.jiratestapi.SyncAuth.SyncAuthService;
-import com.example.jiratestapi.Tasks.Task;
+import com.example.jiratestapi.BatchTicket.BatchTicket;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -146,7 +143,7 @@ public class JiraService {
     // }
 
 
-    public List<Task> fetchTickets() throws Exception {
+    public List<BatchTicket> fetchTickets() throws Exception {
         SyncAuth syncAuth=syncAuthService.getSyncAuth();
 
         String url = syncAuth.getApi_url() + "/search?jql=";
@@ -160,11 +157,12 @@ public class JiraService {
     
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
-        List<Task> tickets = new ArrayList<>();
+        List<BatchTicket> tickets = new ArrayList<>();
         for (JsonNode issue : issues) {
-            Task ticket = new Task();
-            Project project = projectRepository.findByJiraKey(issue.get("fields").get("project").get("key").asText());
-            ticket.setProject(project);
+            BatchTicket ticket = new BatchTicket();
+//            Project project = projectRepository.findByJiraKey();
+           ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
+            ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
             ticket.setJiraId(issue.get("id").asText());
             ticket.setTitle(issue.get("fields").get("summary").asText());
             ticket.setSummary(issue.get("fields").get("summary").asText());
@@ -209,12 +207,12 @@ public class JiraService {
     }
     
 
-    public List<Task> fetchTicketsAssignedToMyEmail() throws Exception {
+    public List<BatchTicket> fetchTicketsAssignedToMyEmail() throws Exception {
         // Récupération de l'email de l'utilisateur actuel (supposant que l'authentification est configurée)
         String currentUserEmail = "Chaimae Rachdi";
 
         // Récupération des tickets assignés à l'email de l'utilisateur actuel
-        List<Task> allTickets = fetchTickets();
+        List<BatchTicket> allTickets = fetchTickets();
         return allTickets.stream()
                          .filter(ticket -> currentUserEmail.equals(ticket.getAssigneeName()))
                          .collect(Collectors.toList());
@@ -222,7 +220,7 @@ public class JiraService {
 
 
 
-    public List<Task> fetchTicketsByProject(String projectKey) throws Exception {
+    public List<BatchTicket> fetchTicketsByProject(String projectKey) throws Exception {
         SyncAuth syncAuth=syncAuthService.getSyncAuth();
 
         String url = syncAuth.getApi_url() + "/search?jql=project=";
@@ -237,11 +235,10 @@ public class JiraService {
     
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
-        List<Task> tickets = new ArrayList<>();
+        List<BatchTicket> tickets = new ArrayList<>();
         for (JsonNode issue : issues) {
-            Task ticket = new Task();
-            Project project = projectRepository.findByJiraKey(projectKey);
-            ticket.setProject(project);
+            BatchTicket ticket = new BatchTicket();
+            ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
             ticket.setJiraId(issue.get("id").asText());
             ticket.setTitle(issue.get("fields").get("summary").asText());
             ticket.setSummary(issue.get("fields").get("summary").asText());

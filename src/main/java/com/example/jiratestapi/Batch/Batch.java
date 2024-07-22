@@ -1,13 +1,12 @@
 package com.example.jiratestapi.Batch;
 
 import com.example.jiratestapi.Projects.Project;
-import com.example.jiratestapi.Tasks.Issue;
-import com.example.jiratestapi.Tasks.Task;
+import com.example.jiratestapi.BatchTicket.BatchTicket;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -18,11 +17,11 @@ public class Batch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date start_date;
-    private Boolean  is_completed;
+    private LocalDateTime startedDate;
+    private Boolean  isCompleted;
     //add errors fields and statistiques and so
-    @OneToMany(mappedBy = "batch")
-    private List<Task> tasks ;
+    @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<BatchTicket> batchTickets ;
     @ManyToOne
     private Project project;
 

@@ -1,6 +1,7 @@
-package com.example.jiratestapi.Tasks;
+package com.example.jiratestapi.Task;
 
 import com.example.jiratestapi.Batch.Batch;
+import com.example.jiratestapi.BatchTicket.ActionType;
 import com.example.jiratestapi.Projects.Project;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 @Entity
 @Data
-public class Issue {
+public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,6 +29,9 @@ public class Issue {
 
     private ActionType action_type;
     private Date action_date;
+
     @ManyToOne
-    private Project project  ;
+    private Project project;
+
+
 }

@@ -1,8 +1,8 @@
 package com.example.jiratestapi.Projects;
 
 import com.example.jiratestapi.Batch.Batch;
-import com.example.jiratestapi.Tasks.Issue;
-import com.example.jiratestapi.Tasks.Task;
+import com.example.jiratestapi.BatchTicket.BatchTicket;
+import com.example.jiratestapi.Task.Task;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,11 +16,12 @@ public class Project {
     private String jiraKey;
     private String name;
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private  List<Batch> batches;
     @OneToMany(mappedBy = "project")
-    private  List<Batch> Batches;
-    @OneToMany(mappedBy = "project")
-    List<Issue> issues;
-
-
-
+    List<Task> issues;
+    public void addBatch(Batch batch) {
+        batches.add(batch);
+        batch.setProject(this);  // Correction ici
+    }
 }

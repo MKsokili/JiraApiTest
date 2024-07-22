@@ -1,6 +1,14 @@
 package com.example.jiratestapi.Jira;
 
-import com.example.jiratestapi.Tasks.Task;
+import com.example.jiratestapi.Batch.Batch;
+import com.example.jiratestapi.Batch.BatchRepository;
+import com.example.jiratestapi.BatchTicket.ActionType;
+import com.example.jiratestapi.BatchTicket.BatchTicket;
+import com.example.jiratestapi.Projects.Project;
+import com.example.jiratestapi.Projects.ProjectRepository;
+import com.example.jiratestapi.Task.Task;
+import com.example.jiratestapi.BatchTicket.BatchTicketRepository;
+import com.example.jiratestapi.Task.TaskRepository;
 import lombok.AllArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,7 +34,10 @@ import java.util.stream.Collectors;
 public class JiraController {
     JiraService jiraService;
 
-    private TicketRepository ticketRepository;
+    private BatchTicketRepository batchTicketRepository;
+    private TaskRepository taskRepository;
+    private ProjectRepository projectRepository;
+    private BatchRepository batchRepository;
     @GetMapping("/create")
     public ResponseEntity<String> createIssue(){
         try{
@@ -51,80 +64,154 @@ public class JiraController {
     }
 
     @GetMapping("/tickets")
-    public List<Task> getTickets() throws Exception {
+    public List<BatchTicket> getTickets() throws Exception {
         return jiraService.fetchTickets();
     }
 
     @GetMapping("/mine")
-    public List<Task> getMyTickets() throws Exception {
+    public List<BatchTicket> getMyTickets() throws Exception {
         return jiraService.fetchTicketsAssignedToMyEmail();
     }
 
     @GetMapping("/fetchByProject/{projectKey}")
-    public List<Task> getMyProjectTickets(@PathVariable String projectKey) throws Exception {
+    public List<BatchTicket> getMyProjectTickets(@PathVariable String projectKey) throws Exception {
         return jiraService.fetchTicketsByProject(projectKey);
     }
 
-    @Transactional
+//    @Transactional
     @PostMapping("/sync")
-    public ResponseEntity<String> syncTickets() throws Exception {
+    public List<BatchTicket> syncTickets() throws Exception {
 
-        List<Task> tickets = jiraService.fetchTickets();
+        List<BatchTicket> batchTickets = jiraService.fetchTickets();
 
-        int countUpdatedTickets = 0;
-        int countCreatedTickets = 0 ;
+
 
 
 
         // Récupération des jiraIds des tickets obtenus depuis Jira
-        List<String> jiraIds = tickets.stream()
-                                      .map(Task::getJiraId)
+        List<String> jiraIds = batchTickets.stream()
+                                      .map(BatchTicket::getJiraId)
                                       .collect(Collectors.toList());
 
         // Récupération des tickets existants dans la base de données qui ne sont plus présents dans Jira
-        List<Task> ticketsInDatabase = ticketRepository.findAll();
-        List<Task> ticketsToDelete = ticketsInDatabase.stream()
+        List<Task> tasksInDatabase = taskRepository.findAll();
+        List<Task> ticketsToDelete = tasksInDatabase.stream()
                                                         .filter(ticket -> !jiraIds.contains(ticket.getJiraId()))
                                                         .collect(Collectors.toList());
 
         // Suppression des tickets qui ne sont plus présents dans Jira
-        int countDeletedTickets = ticketsToDelete.size();
-        System.out.println("deleted : " +countDeletedTickets);
-        ticketRepository.deleteAll(ticketsToDelete);                                               
+//        int countDeletedTickets = ticketsToDelete.size();
+//        System.out.println("deleted : " +countDeletedTickets);
+//        ticketRepository.deleteAll(ticketsToDelete);
         
         // Sauvegarde des tickets dans la base de données
-        for (Task ticket : tickets) {
-            Optional<Task> existingTicket = ticketRepository.findByJiraId(ticket.getJiraId());
+
+        for (BatchTicket ticket : batchTickets) {
+            Optional<Task> existingTicket = taskRepository.findByJiraId(ticket.getJiraId());
             if (existingTicket.isPresent()) {
-                // Si le ticket existe déjà, vous pouvez le mettre à jour si nécessaire
-                Task ticketToUpdate = existingTicket.get();
-                ticketToUpdate.setProject(ticket.getProject());
-                ticketToUpdate.setTitle(ticket.getTitle());
-                ticketToUpdate.setSummary(ticket.getSummary());
-                ticketToUpdate.setDescription(ticket.getDescription());
-                ticketToUpdate.setStatus(ticket.getStatus());
-                ticketToUpdate.setCreated(ticket.getCreated());
-                ticketToUpdate.setStoryPoints(ticket.getStoryPoints());
-                ticketToUpdate.setAssigneeName(ticket.getAssigneeName());
-                if (!ticketToUpdate.getUpdated().equals(ticket.getUpdated())) {
-                    ticketToUpdate.setUpdated(ticket.getUpdated());
-                    countUpdatedTickets++;
-                }
-                ticketRepository.save(ticketToUpdate);
+            ticket.setAction_type(ActionType.UPDATED);
+//            batchTicketRepository.save(ticket);
+
+
             } else {
-                // Si le ticket n'existe pas, le sauvegarder
-                ticketRepository.save(ticket);
-                countCreatedTickets++ ;
+                ticket.setAction_type(ActionType.CREATED);
+//                batchTicketRepository.save(ticket);
             }
+
+
         }
 
-        System.out.println("updated : " + countUpdatedTickets) ;
-        System.out.println("created : " + countCreatedTickets) ;
 
-        return ResponseEntity.ok("Tickets synchronized successfully");
+        List<Project> projects = projectRepository.findAll();
+        System.out.println("_________________________________________________________________________________________________________________");
+
+        for (Project project : projects) {
+            System.out.println("project:" + project.getJiraKey());
+            if (project.getJiraKey() == null) {
+                continue;
+            }
+
+            List<BatchTicket> ticketsList = new ArrayList<>();
+            int incr = 0;
+            Batch batch = new Batch();
+            for (BatchTicket batchTicket : batchTickets) {
+                if (project.getJiraKey().equals(batchTicket.getProjectKey())) {
+                    System.out.println(incr++ + batchTicket.getProjectKey() + "==" + project.getJiraKey());
+                    batchTicket.setBatch(batch);
+                    ticketsList.add(batchTicket);
+                }
+            }
+
+            if (!ticketsList.isEmpty()||ticketsList.get(0).getBatch()!=null) {
+                System.out.println("ticketsList:" + ticketsList.get(0).getSummary());
+                batch.setBatchTickets(ticketsList);
+                batch.setStartedDate(LocalDateTime.now());
+                batch.setProject(project); // Assurez-vous d'associer le batch au project
+                batchRepository.save(batch);
+                project.setName("11111");
+                projectRepository.save(project);
+            }else{
+                System.out.println("else----");
+            }
+        }
+        return batchTickets;
 
     }
 
 
 }
 
+
+//List<BatchTask> tickets = jiraService.fetchTickets();
+//
+//int countUpdatedTickets = 0;
+//int countCreatedTickets = 0 ;
+//
+//
+//
+//// Récupération des jiraIds des tickets obtenus depuis Jira
+//List<String> jiraIds = tickets.stream()
+//        .map(BatchTask::getJiraId)
+//        .collect(Collectors.toList());
+//
+//// Récupération des tickets existants dans la base de données qui ne sont plus présents dans Jira
+//List<BatchTask> ticketsInDatabase = ticketRepository.findAll();
+//List<BatchTask> ticketsToDelete = ticketsInDatabase.stream()
+//        .filter(ticket -> !jiraIds.contains(ticket.getJiraId()))
+//        .collect(Collectors.toList());
+//
+//// Suppression des tickets qui ne sont plus présents dans Jira
+//int countDeletedTickets = ticketsToDelete.size();
+//        System.out.println("deleted : " +countDeletedTickets);
+//        ticketRepository.deleteAll(ticketsToDelete);
+//
+//// Sauvegarde des tickets dans la base de données
+//        for (BatchTask ticket : tickets) {
+//Optional<BatchTask> existingTicket = ticketRepository.findByJiraId(ticket.getJiraId());
+//            if (existingTicket.isPresent()) {
+//// Si le ticket existe déjà, vous pouvez le mettre à jour si nécessaire
+//BatchTask ticketToUpdate = existingTicket.get();
+//                ticketToUpdate.setProject(ticket.getProject());
+//        ticketToUpdate.setTitle(ticket.getTitle());
+//        ticketToUpdate.setSummary(ticket.getSummary());
+//        ticketToUpdate.setDescription(ticket.getDescription());
+//        ticketToUpdate.setStatus(ticket.getStatus());
+//        ticketToUpdate.setCreated(ticket.getCreated());
+//        ticketToUpdate.setStoryPoints(ticket.getStoryPoints());
+//        ticketToUpdate.setAssigneeName(ticket.getAssigneeName());
+//        if (!ticketToUpdate.getUpdated().equals(ticket.getUpdated())) {
+//        ticketToUpdate.setUpdated(ticket.getUpdated());
+//countUpdatedTickets++;
+//        }
+//        ticketRepository.save(ticketToUpdate);
+//            } else {
+//                    // Si le ticket n'existe pas, le sauvegarder
+//                    ticketRepository.save(ticket);
+//countCreatedTickets++ ;
+//        }
+//        }
+//
+//        System.out.println("updated : " + countUpdatedTickets) ;
+//        System.out.println("created : " + countCreatedTickets) ;
+//
+//        return tickets;

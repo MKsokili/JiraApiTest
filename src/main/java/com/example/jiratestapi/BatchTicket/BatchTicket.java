@@ -1,8 +1,7 @@
-package com.example.jiratestapi.Tasks;
+package com.example.jiratestapi.BatchTicket;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 
 import com.example.jiratestapi.Batch.Batch;
 import com.example.jiratestapi.Projects.Project;
@@ -17,11 +16,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Task {
+public class BatchTicket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String jiraId;
+    private String projectKey;
     private String title;
     private String summary;
     private String description;
@@ -33,13 +33,10 @@ public class Task {
 
     private Integer storyPoints;
 
-
     private ActionType action_type;
     private Date action_date;
     @ManyToOne
     @JoinColumn(name = "batch_id")
     private Batch batch  ;
 
-    @ManyToOne
-    private Project project;
 }
