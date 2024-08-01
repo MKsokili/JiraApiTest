@@ -29,8 +29,5 @@ public class BatchController {
             throw new RuntimeException("Error while getting tasks of the last batch", exception);
         }
         return batchTickets;
-
     }
-
-
 }
