@@ -16,5 +16,4 @@ public interface BatchRepository extends JpaRepository<Batch, Long> {
     @Query("SELECT b FROM Batch b ORDER BY b.startedDate DESC")
     List<Batch> findAllBatchesOrderedByStartedDateDesc();
 
-
 }
