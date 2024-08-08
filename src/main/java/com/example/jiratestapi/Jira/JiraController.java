@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,46 +85,7 @@ public class JiraController {
 
         List<BatchTicket> batchTickets = jiraService.fetchTickets();
 
-
-
-
-
-        // Récupération des jiraIds des tickets obtenus depuis Jira
-        List<String> jiraIds = batchTickets.stream()
-                                      .map(BatchTicket::getJiraId)
-                                      .collect(Collectors.toList());
-
-        // Récupération des tickets existants dans la base de données qui ne sont plus présents dans Jira
-        List<Task> tasksInDatabase = taskRepository.findAll();
-        List<Task> ticketsToDelete = tasksInDatabase.stream()
-                                                        .filter(ticket -> !jiraIds.contains(ticket.getJiraId()))
-                                                        .collect(Collectors.toList());
-
-        // Suppression des tickets qui ne sont plus présents dans Jira
-//        int countDeletedTickets = ticketsToDelete.size();
-//        System.out.println("deleted : " +countDeletedTickets);
-//        ticketRepository.deleteAll(ticketsToDelete);
-        
-        // Sauvegarde des tickets dans la base de données
-
-        for (BatchTicket ticket : batchTickets) {
-            Optional<Task> existingTicket = taskRepository.findByJiraId(ticket.getJiraId());
-            if (existingTicket.isPresent()) {
-            ticket.setAction_type(ActionType.UPDATED);
-//            batchTicketRepository.save(ticket);
-
-
-            } else {
-                ticket.setAction_type(ActionType.CREATED);
-//                batchTicketRepository.save(ticket);
-            }
-
-
-        }
-
-
         List<Project> projects = projectRepository.findAll();
-        System.out.println("_________________________________________________________________________________________________________________");
 
         for (Project project : projects) {
             System.out.println("project:" + project.getJiraKey());
@@ -131,12 +93,16 @@ public class JiraController {
                 continue;
             }
 
+            List<Task> tasksByProjectId = taskRepository.findAllByProjectId(project.getId());
+            int countTasksByProjectId = tasksByProjectId.size();
+
             List<BatchTicket> ticketsList = new ArrayList<>();
-            int incr = 0;
+            int countSyncTickets = 0;
             Batch batch = new Batch();
             for (BatchTicket batchTicket : batchTickets) {
                 if (project.getJiraKey().equals(batchTicket.getProjectKey())) {
-                    System.out.println(incr++ + batchTicket.getProjectKey() + "==" + project.getJiraKey());
+                    countSyncTickets++;
+//                    System.out.println(incr++ + batchTicket.getProjectKey() + "==" + project.getJiraKey());
                     batchTicket.setBatch(batch);
                     ticketsList.add(batchTicket);
                 }
@@ -145,13 +111,19 @@ public class JiraController {
             if (!ticketsList.isEmpty()||ticketsList.get(0).getBatch()!=null) {
                 System.out.println("ticketsList:" + ticketsList.get(0).getSummary());
                 batch.setBatchTickets(ticketsList);
-                batch.setStartedDate(LocalDateTime.now());
+                batch.setStartedDate(LocalDate.now());
+                batch.setTicketsCreated(0);
+                batch.setTicketsUpdated(0);
+                batch.setTotalTicketsSync(countSyncTickets);
+                batch.setTicketsDeleted(countTasksByProjectId - countSyncTickets);
+                batch.setTicketsUnchanged(0);
                 batch.setProject(project); // Assurez-vous d'associer le batch au project
+                batch.setIsCompleted(true);
                 batchRepository.save(batch);
-                project.setName("11111");
                 projectRepository.save(project);
             }else{
                 System.out.println("else----");
+                batch.setIsCompleted(false);
             }
         }
         return batchTickets;

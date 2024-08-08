@@ -74,135 +74,112 @@ public class JiraService {
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         return response.getBody();
+                // JQL query to get issues created in the last 5 minutes
+            // SyncAuth syncAuth=syncAuthService.getSyncAuth();
+
+            //     String jql = "created >= -5m";
+            //     String fields = "comment , assignee"; // Specify the fields you need, e.g., "comment"
+            //     String url = syncAuth.getApi_url() + "/search?jql=" + "&fields=" + fields;
+        
+            //     HttpEntity<String> entity = new HttpEntity<>(createHeaders());
+            //     ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        
+            //     // Return only the body of the response
+            //     return response.getBody();
     }
-
-
-    // public List<Ticket> fetchTickets(String apiToken) throws Exception {
-    //     String url = jiraBaseUrl + "/search?jql=project=SCRUM";
-
-    //     HttpHeaders headers = new HttpHeaders();
-    //     headers.set("Authorization", "Basic " + Base64.getEncoder().encodeToString((jiraUsername + ":" + apiToken).getBytes()));
-    //     headers.set("Content-Type", "application/json");
-
-    //     HttpEntity<String> entity = new HttpEntity<>(headers);
-
-    //     ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-    //     // Parse the response and map to Ticket objects
-    //     ObjectMapper objectMapper = new ObjectMapper();
-    //     JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-    //     JsonNode issues = jsonResponse.get("issues");
-
-    //     List<Ticket> tickets = new ArrayList<>();
-    //     for (JsonNode issue : issues) {
-    //         Ticket ticket = new Ticket();
-    //         ticket.setJiraId(issue.get("id").asText());
-    //         ticket.setTitle(issue.get("fields").get("summary").asText());
-    //         ticket.setDescription(issue.get("fields").get("description").asText());
-    //         ticket.setStatus(issue.get("fields").get("status").get("name").asText());
-    //         ticket.setCreatedDate(new Date(issue.get("fields").get("created").asText()));
-    //         ticket.setUpdatedDate(new Date(issue.get("fields").get("updated").asText()));
-    //         tickets.add(ticket);
-    //     }
-
-    //     return tickets;
-    // }
-
-
-    // public List<Ticket> fetchTickets() throws Exception {
-
-    //     String url = jiraBaseUrl + "/search?jql=";
-    //     HttpEntity<String> entity = new HttpEntity<>(createHeaders());
-    //     ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-    //     // Parse the response and map to Ticket objects
-    //     ObjectMapper objectMapper = new ObjectMapper();
-    //     JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-    //     JsonNode issues = jsonResponse.get("issues");
-
-    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-
-    //     List<Ticket> tickets = new ArrayList<>();
-    //     for (JsonNode issue : issues) {
-    //         Ticket ticket = new Ticket();
-    //         ticket.setJiraId(issue.get("id").asText());
-    //         ticket.setTitle(issue.get("fields").get("summary").asText());
-    //         ticket.setDescription(issue.get("fields").get("description").asText());
-    //         ticket.setSummary(issue.get("fields").get("summary").asText());
-    //         ticket.setStatus(issue.get("fields").get("status").get("name").asText());
-    //         ZonedDateTime createdZonedDateTime = ZonedDateTime.parse(issue.get("fields").get("created").asText(), formatter);
-    //         Date createdDate = Date.from(createdZonedDateTime.toInstant());
-    //         ticket.setCreatedDate(createdDate);
-    //         ZonedDateTime updatedZonedDateTime = ZonedDateTime.parse(issue.get("fields").get("updated").asText(), formatter);
-    //         Date updatedDate = Date.from(updatedZonedDateTime.toInstant());
-    //         ticket.setUpdatedDate(updatedDate);
-    //         tickets.add(ticket);
-    //     }
-
-    //     return tickets;
-    // }
 
 
     public List<BatchTicket> fetchTickets() throws Exception {
         SyncAuth syncAuth=syncAuthService.getSyncAuth();
-
-        String url = syncAuth.getApi_url() + "/search?jql=";
-        HttpEntity<String> entity = new HttpEntity<>(createHeaders());
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-    
-        // Parse the response and map to Ticket objects
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-        JsonNode issues = jsonResponse.get("issues");
-    
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    
-        List<BatchTicket> tickets = new ArrayList<>();
-        for (JsonNode issue : issues) {
-            BatchTicket ticket = new BatchTicket();
-//            Project project = projectRepository.findByJiraKey();
-           ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
-            ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
-            ticket.setJiraId(issue.get("id").asText());
-            ticket.setTitle(issue.get("fields").get("summary").asText());
-            ticket.setSummary(issue.get("fields").get("summary").asText());
-            ticket.setDescription(issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null);
-            ticket.setStatus(issue.get("fields").get("status").get("name").asText());
-                    
-                // Récupération des dates de création et de mise à jour
-        String createdStr = issue.get("fields").get("created").asText();
-        String updatedStr = issue.get("fields").get("updated").asText();
-        LocalDateTime created = LocalDateTime.parse(createdStr, formatter);
-        LocalDateTime updated = LocalDateTime.parse(updatedStr, formatter);
-
-        ticket.setCreated(created);
-        ticket.setUpdated(updated);
-
-        // Récupération de l'email de l'assignee
-        // Vérification et récupération de l'email de l'assignee
-        if (issue.get("fields").has("assignee") && !issue.get("fields").get("assignee").isNull()) {
-            JsonNode assigneeNode = issue.get("fields").get("assignee");
-            if (assigneeNode.has("displayName") && !assigneeNode.get("displayName").isNull()) {
-                ticket.setAssigneeName(assigneeNode.get("displayName").asText());
-            } else {
-                ticket.setAssigneeName(null);
-            }
-        } else {
-            ticket.setAssigneeName(null);
-        } 
-        
-        // Extract story points
-           if (issue.get("fields").has("customfield_10016") && !issue.get("fields").get("customfield_10016").isNull()) {
-                ticket.setStoryPoints(issue.get("fields").get("customfield_10016").asInt());
-            } else {
-                ticket.setStoryPoints(null);
-            }
-        
-
-
-            tickets.add(ticket);
+        if (syncAuth == null) {
+            throw new Exception("SyncAuth is null");
         }
-        return tickets;
+        else {
+            String url = syncAuth.getApi_url() + "/search?jql=";
+            HttpEntity<String> entity = new HttpEntity<>(createHeaders());
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+            // Parse the response and map to Ticket objects
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+            JsonNode issues = jsonResponse.get("issues");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+            List<BatchTicket> tickets = new ArrayList<>();
+            for (JsonNode issue : issues) {
+
+                // Check the issue type and skip bugs
+                String issueType = issue.get("fields").get("issuetype").get("name").asText();
+                if (issueType.equalsIgnoreCase("Bug")) {
+                    continue; // Skip this iteration if the issue type is "Bug"
+                }
+
+                BatchTicket ticket = new BatchTicket();
+//            Project project = projectRepository.findByJiraKey();
+                ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
+                // ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
+                ticket.setJiraId(issue.get("id").asText());
+                ticket.setSummary(issue.get("fields").get("summary").asText());
+                ticket.setDescription(issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null);
+                ticket.setStatus(issue.get("fields").get("status").get("name").asText());
+                if (issue.get("fields").has("priority") && !issue.get("fields").get("priority").isNull()) {
+                    ticket.setPriority(issue.get("fields").get("priority").get("name").asText());
+                } else {
+                    ticket.setPriority(null);
+                }
+                // Récupération des dates de création et de mise à jour
+                String createdStr = issue.get("fields").get("created").asText();
+                String updatedStr = issue.get("fields").get("updated").asText();
+                LocalDateTime created = LocalDateTime.parse(createdStr, formatter);
+                LocalDateTime updated = LocalDateTime.parse(updatedStr, formatter);
+
+                ticket.setCreated(created);
+                ticket.setUpdated(updated);
+
+                // Récupération de le nom et prénom de l'assignee
+                if (issue.get("fields").has("assignee") && !issue.get("fields").get("assignee").isNull()) {
+                    JsonNode assigneeNode = issue.get("fields").get("assignee");
+                    if (assigneeNode.has("displayName") && !assigneeNode.get("displayName").isNull()) {
+                        ticket.setAssigneeName(assigneeNode.get("displayName").asText());
+                    } else {
+                        ticket.setAssigneeName(null);
+                    }
+                } else {
+                    ticket.setAssigneeName(null);
+                }
+
+                // Extract story points
+                if (issue.get("fields").has("customfield_10016") && !issue.get("fields").get("customfield_10016").isNull()) {
+                    ticket.setCharge(issue.get("fields").get("customfield_10016").asDouble());
+                    ticket.setReevaluatedCharge(issue.get("fields").get("customfield_10016").asDouble());
+                    ticket.setAssignedCharge(issue.get("fields").get("customfield_10016").asDouble());
+                } else if (issue.get("fields").has("customfield_10032") && !issue.get("fields").get("customfield_10032").isNull()) {
+                    ticket.setCharge(issue.get("fields").get("customfield_10032").asDouble());
+                    ticket.setReevaluatedCharge(issue.get("fields").get("customfield_10032").asDouble());
+                    ticket.setAssignedCharge(issue.get("fields").get("customfield_10032").asDouble());
+                } else {
+                    ticket.setCharge(null);
+                    ticket.setAssignedCharge(null);
+                    ticket.setReevaluatedCharge(null);
+                }
+
+//            if (issue.get("fields").has("comment") && !issue.get("fields").get("comment").isNull()) {
+//                        JsonNode commentsNode = issue.get("fields").get("comment").get("comments");
+//                        if (commentsNode.size() > 0) {
+//                            ticket.setComment(commentsNode.get(0).get("body").asText());
+//                        } else {
+//                            ticket.setComment(null);
+//                        }
+//                    } else {
+//                        ticket.setComment(null);
+//            }
+
+
+                tickets.add(ticket);
+            }
+            return tickets;
+        }
 
     }
     
@@ -240,7 +217,6 @@ public class JiraService {
             BatchTicket ticket = new BatchTicket();
             ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
             ticket.setJiraId(issue.get("id").asText());
-            ticket.setTitle(issue.get("fields").get("summary").asText());
             ticket.setSummary(issue.get("fields").get("summary").asText());
             ticket.setDescription(issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null);
             ticket.setStatus(issue.get("fields").get("status").get("name").asText());
