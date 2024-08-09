@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,15 +42,16 @@ public class BatchController {
         LocalDate batchDate = LocalDate.parse(date, formatter);
 
         // Find the batch by project and date (assuming you use LocalDate for the date part)
-        Batch batchProject = batchRepository.findByProjectAndStartedDate(project, batchDate);
+        Optional<Batch> batchProject = batchRepository.findByProjectAndStartedDate(project, batchDate);
 
-        if (batchProject == null) {
+        if (batchProject.isPresent()) {
             // Gérer le cas où aucun résultat n'est trouvé
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No batch found for the given project and date");
-//            return null;
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No batch found for the given project and date");
+            return batchProject.get();
+        }else{
+            return null;
         }
 
-        return batchProject;
 
     }
 

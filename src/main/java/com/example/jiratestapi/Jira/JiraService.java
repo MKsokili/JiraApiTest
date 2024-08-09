@@ -48,7 +48,7 @@ public class JiraService {
     public String getIssuesCreatedInLastWeek() {
         SyncAuth syncAuth=syncAuthService.getSyncAuth();
 
-        String url = syncAuth.getApi_url() + "/search?jql=created >= -7d";
+        String url = syncAuth.getApi_url() + "rest/api/2/search?jql=created >= -7d";
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         return response.getBody();
@@ -57,7 +57,7 @@ public class JiraService {
     public String createIssue(String projectKey, String summary, String description, String issueType) {
         SyncAuth syncAuth=syncAuthService.getSyncAuth();
 
-        String url = syncAuth.getApi_url() + "/issue";
+        String url = syncAuth.getApi_url() + "rest/api/2/issue";
         HttpHeaders headers = createHeaders();
         String requestBody = String.format(
                 "{ \"fields\": { \"project\": { \"key\": \"%s\" }, \"summary\": \"%s\", \"description\": \"%s\", \"issuetype\": { \"name\": \"%s\" } } }",
@@ -70,7 +70,7 @@ public class JiraService {
         // JQL query to get issues created in the last 5 minutes
         String jql = "created >= -5m";
         SyncAuth syncAuth=syncAuthService.getSyncAuth();
-        String url = syncAuth.getApi_url()+ "/search?jql=";
+        String url = syncAuth.getApi_url()+ "rest/api/2/search?jql=";
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         return response.getBody();
@@ -95,7 +95,7 @@ public class JiraService {
             throw new Exception("SyncAuth is null");
         }
         else {
-            String url = syncAuth.getApi_url() + "/search?jql=";
+            String url = syncAuth.getApi_url() + "rest/api/2/search?jql=";
             HttpEntity<String> entity = new HttpEntity<>(createHeaders());
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
@@ -200,7 +200,7 @@ public class JiraService {
     public List<BatchTicket> fetchTicketsByProject(String projectKey) throws Exception {
         SyncAuth syncAuth=syncAuthService.getSyncAuth();
 
-        String url = syncAuth.getApi_url() + "/search?jql=project=";
+        String url = syncAuth.getApi_url() + "rest/api/2/search?jql=project=";
         String urlProject = url+projectKey;
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(urlProject, HttpMethod.GET, entity, String.class);

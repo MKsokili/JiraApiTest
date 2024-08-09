@@ -49,7 +49,7 @@ public class SchedulingConfig {
     private BatchTicketRepository batchTicketRepository;
     // @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 */20 * * * ?")
     public void syncTicketsNightly() throws Exception {
         List<BatchTicket> tasks= ticketController.syncTickets();
 

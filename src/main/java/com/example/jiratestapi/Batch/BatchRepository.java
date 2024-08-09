@@ -16,5 +16,5 @@ public interface BatchRepository extends JpaRepository<Batch, Long> {
 
         List<Batch> findByProject(Project project);
 
-    Batch findByProjectAndStartedDate(Project project, LocalDate batchDate);
+    Optional<Batch> findByProjectAndStartedDate(Project project, LocalDate batchDate);
 }
