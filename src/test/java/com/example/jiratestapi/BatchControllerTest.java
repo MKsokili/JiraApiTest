@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
@@ -50,7 +51,7 @@ public class BatchControllerTest {
 
         // Mocking repository responses
         when(projectRepository.findByJiraKey("TEST_KEY")).thenReturn(project);
-        when(batchRepository.findByProjectAndStartedDate(project, LocalDate.of(2023, 8, 1))).thenReturn(batch);
+        when(batchRepository.findByProjectAndStartedDate(project, LocalDate.of(2023, 8, 1))).thenReturn(Optional.of(batch));
 
         // Perform the request and assert the response
         mockMvc.perform(get("/batch/TEST_KEY/2023-08-01"))
