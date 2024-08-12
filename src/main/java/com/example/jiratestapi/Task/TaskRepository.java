@@ -9,5 +9,7 @@ import java.util.Optional;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByJiraId(String jiraId);
-    List<Task> findAllByProjectId(Long projectId);
- }
+//    List<Task> findAllByProjectId(Long projectId);
+List<Task> findAllByProjectIdAndStatusNot(Long projectId, String status);
+
+}

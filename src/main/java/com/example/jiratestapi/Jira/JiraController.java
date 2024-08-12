@@ -93,10 +93,12 @@ public class JiraController {
                 continue;
             }
 
-            List<Task> tasksByProjectId = taskRepository.findAllByProjectId(project.getId());
+            List<Task> tasksByProjectId = taskRepository.findAllByProjectIdAndStatusNot(project.getId() , "Archived");
             int countTasksByProjectId = tasksByProjectId.size();
 
             List<BatchTicket> ticketsList = new ArrayList<>();
+            List<Task> ticketsToDelete = new ArrayList<>();
+
             int countSyncTickets = 0;
             Batch batch = new Batch();
             for (BatchTicket batchTicket : batchTickets) {
@@ -108,6 +110,14 @@ public class JiraController {
                 }
             }
 
+            List<String> jiraIds = ticketsList.stream()
+                    .map(BatchTicket::getJiraId)
+                    .collect(Collectors.toList());
+
+            ticketsToDelete = tasksByProjectId.stream()
+                    .filter(task -> !jiraIds.contains(task.getJiraId()))
+                    .collect(Collectors.toList());
+
             if (!ticketsList.isEmpty()||ticketsList.get(0).getBatch()!=null) {
                 System.out.println("ticketsList:" + ticketsList.get(0).getSummary());
                 batch.setBatchTickets(ticketsList);
@@ -115,7 +125,12 @@ public class JiraController {
                 batch.setTicketsCreated(0);
                 batch.setTicketsUpdated(0);
                 batch.setTotalTicketsSync(countSyncTickets);
-                batch.setTicketsDeleted(countTasksByProjectId - countSyncTickets);
+                batch.setTicketsDeleted(ticketsToDelete.size());
+//                if (countSyncTickets < countTasksByProjectId) {
+//                    batch.setTicketsDeleted(countTasksByProjectId - countSyncTickets);
+//                } else {
+//                    batch.setTicketsDeleted(0);
+//                }
                 batch.setTicketsUnchanged(0);
                 batch.setProject(project); // Assurez-vous d'associer le batch au project
                 batch.setIsCompleted(true);
