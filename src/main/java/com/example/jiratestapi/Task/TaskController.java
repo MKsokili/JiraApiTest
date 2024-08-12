@@ -17,4 +17,5 @@ public class TaskController {
     public List<Task> getTasksByProjectId(@PathVariable Long projectId){
         return  taskRepository.findAllByProjectId(projectId);
     }
+
 }
