@@ -35,8 +35,11 @@ public class SyncAuthService {
     }
 
     public SyncAuth getSyncAuthInstant() {
-        Optional<SyncAuth> list =syncAuthRepository.findById(1L);
-        return list.get();
+        List<SyncAuth> syncAuthList = syncAuthRepository.findAll();
+        if(syncAuthList.isEmpty()){
+            return new SyncAuth();
+        }
+        return syncAuthList.get(0);
     }
     public Boolean checkIfConnected(SyncAuth syn) {
         String auth = syn.getEmail() + ":" + syn.getToken();
@@ -69,8 +72,13 @@ public class SyncAuthService {
 
 
     public VerifySyncResponse verifyIfConnected() {
-        Optional<SyncAuth> syncAuth = syncAuthRepository.findById(1L);
-        Boolean res = checkIfConnected(syncAuth.orElse(null)); // Handle Optional properly
-        return new VerifySyncResponse(res, syncAuth.orElse(null));
+        SyncAuth syncAuth = getSyncAuthInstant();
+
+        if(syncAuth==null){
+            return new VerifySyncResponse(false,null);
+
+        }
+        Boolean res = checkIfConnected(syncAuth); // Handle Optional properly
+        return new VerifySyncResponse(res, syncAuth);
     }
 }
