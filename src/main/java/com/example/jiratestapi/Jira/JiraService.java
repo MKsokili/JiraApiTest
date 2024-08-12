@@ -95,7 +95,7 @@ public class JiraService {
             throw new Exception("SyncAuth is null");
         }
         else {
-            String url = syncAuth.getApiUrl() + "rest/api/2/search?jql=";
+            String url = syncAuth.getApiUrl() + "/rest/api/2/search?jql=";
             HttpEntity<String> entity = new HttpEntity<>(createHeaders());
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 

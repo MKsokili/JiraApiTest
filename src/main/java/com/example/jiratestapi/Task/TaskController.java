@@ -13,8 +13,8 @@ import java.util.List;
 public class TaskController {
     @Autowired
     private TaskRepository taskRepository;
-    @GetMapping("/{projectId}")
-    public List<Task> getTasksByProjectId(@PathVariable Long projectId){
-        return  taskRepository.findAllByProjectId(projectId);
-    }
+//    @GetMapping("/{projectId}")
+//    public List<Task> getTasksByProjectId(@PathVariable Long projectId){
+//        return  taskRepository.findAllByProjectId(projectId);
+//    }
 }
