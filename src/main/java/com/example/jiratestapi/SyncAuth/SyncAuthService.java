@@ -64,8 +64,7 @@ public class SyncAuthService {
                 return false;
             }
         } catch (RestClientException e) {
-            // Log the exception for debugging
-//            System.err.println("Exception occurred while connecting: " + e.getMessage());
+            // Log the exception for debuggingSystem.err.println("Exception occurred while connecting: " + e.getMessage());
             return false;
         }
     }
