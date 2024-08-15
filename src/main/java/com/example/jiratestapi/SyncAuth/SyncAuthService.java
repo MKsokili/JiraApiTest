@@ -73,8 +73,8 @@ public class SyncAuthService {
     public VerifySyncResponse verifyIfConnected() {
         SyncAuth syncAuth = getSyncAuthInstant();
 
-        if(syncAuth==null){
-            return new VerifySyncResponse(false,null);
+        if(syncAuth==null||syncAuth.getToken()==null||syncAuth.getApiUrl()==null){
+            return new VerifySyncResponse(false,syncAuth);
 
         }
         Boolean res = checkIfConnected(syncAuth); // Handle Optional properly
