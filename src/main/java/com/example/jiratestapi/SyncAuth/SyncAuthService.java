@@ -64,8 +64,7 @@ public class SyncAuthService {
                 return false;
             }
         } catch (RestClientException e) {
-            // Log the exception for debugging
-            System.err.println("Exception occurred while connecting: " + e.getMessage());
+            // Log the exception for debuggingSystem.err.println("Exception occurred while connecting: " + e.getMessage());
             return false;
         }
     }
@@ -74,8 +73,8 @@ public class SyncAuthService {
     public VerifySyncResponse verifyIfConnected() {
         SyncAuth syncAuth = getSyncAuthInstant();
 
-        if(syncAuth==null){
-            return new VerifySyncResponse(false,null);
+        if(syncAuth==null||syncAuth.getToken()==null||syncAuth.getApiUrl()==null){
+            return new VerifySyncResponse(false,syncAuth);
 
         }
         Boolean res = checkIfConnected(syncAuth); // Handle Optional properly

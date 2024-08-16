@@ -2,7 +2,6 @@ package com.example.jiratestapi.Configs;
 
 import com.example.jiratestapi.Batch.Batch;
 import com.example.jiratestapi.Batch.BatchRepository;
-import com.example.jiratestapi.Batch.BatchService;
 import com.example.jiratestapi.Projects.Project;
 import com.example.jiratestapi.Projects.ProjectRepository;
 import com.example.jiratestapi.Task.Task;
@@ -47,13 +46,10 @@ public class SchedulingConfig {
     private BatchRepository batchRepository;
 
     @Autowired
-    private BatchService batchService;
-
-    @Autowired
     private BatchTicketRepository batchTicketRepository;
     // @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
-//    @Scheduled(cron = "0 */45 * * * ?")
+//    @Scheduled(cron = "0 */2 * * * ?")
     public void syncTicketsNightly() throws Exception {
         List<BatchTicket> tasks= ticketController.syncTickets();
 
@@ -63,6 +59,7 @@ public class SchedulingConfig {
             return;
         }
 
+        Optional<Batch> optionalBatch = batchRepository.findById(tasks.get(0).getBatch().getId());
 
         System.out.println("start in saving tasks to db after batch");
         System.out.println("task 1:" +tasks.get(0).getSummary());
@@ -88,6 +85,28 @@ public class SchedulingConfig {
             // Additional handling logic can be added here if needed
         }
 
+        // Récupération des jiraIds des tickets à supprimer
+        List<String> jiraIdsToDelete = ticketsToDelete.stream()
+                .map(Task::getJiraId)
+                .collect(Collectors.toList());
+
+        // Debug statement to ensure we have the correct jiraIds to delete
+//        System.out.println("Jira IDs to delete: " + jiraIdsToDelete);
+//
+//        // Mise à jour de actionType des BatchTicket correspondants
+//        List<BatchTicket> batchTicketsToDelete = tasks.stream()
+//                .filter(task -> jiraIdsToDelete.contains(task.getJiraId()))
+//                .collect(Collectors.toList());
+
+//        System.out.println("BatchTickets to update: " + batchTicketsToDelete);
+
+//        batchTicketsToDelete.forEach(batchTicket -> {
+//            batchTicket.setAction_type(ActionType.DELETED);
+//            System.out.println("Setting actionType to DELETED for BatchTicket with JiraId: " + batchTicket.getJiraId());
+//        });
+
+        // Persist the updated BatchTicket objects if needed
+//        batchTicketRepository.saveAll(batchTicketsToDelete);
 
         // Suppression des tickets qui ne sont plus présents dans Jira
         int countDeletedTickets = ticketsToDelete.size();
@@ -104,17 +123,90 @@ public class SchedulingConfig {
                 // Si le ticket existe déjà, vous pouvez le mettre à jour si nécessaire
                 Task ticketToUpdate = existingTicket.get();
 
-                batchService.CheckUpdateTasksFromBatch(ticket , ticketToUpdate);
+                boolean dateChanged = ticket.getUpdated().isAfter(ticketToUpdate.getUpdated());
+
+                if (dateChanged) {
+
+                    ticketToUpdate.setSummary(ticket.getSummary());
+                    ticketToUpdate.setDescription(ticket.getDescription());
+                    ticketToUpdate.setStatus(ticket.getStatus());
+                    ticketToUpdate.setCreated(ticket.getCreated());
+                    ticketToUpdate.setCharge(ticket.getCharge());
+                    ticketToUpdate.setComment(ticket.getComment());
+                    ticketToUpdate.setPriority(ticket.getPriority());
+                    //if (!ticketToUpdate.getUpdated().equals(ticket.getUpdated())) {
+                    ticketToUpdate.setUpdated(ticket.getUpdated());
+                    if (ticket.getBatch() != null) {
+                        ticket.getBatch().setTicketsUpdated(ticket.getBatch().getTicketsUpdated() + 1);
+                    }
+                    ticket.setAction_type(ActionType.UPDATED);
+                    countUpdatedTickets++;
+
+                    // Update Assign ticket to user
+
+                    String displayName = ticket.getAssigneeName();
+                    if (displayName != null) {
+                        String[] names = displayName.split(" ");
+                        if (names.length >= 2) {
+                            String firstName = names[0];
+                            String lastName = names[1];
+                            User user = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+                            if (user != null) {
+                                ticketToUpdate.setAssignedTo(user);
+                            }
+                        }
+                    }
+                    taskRepository.save(ticketToUpdate);
+                }else {
+                    ticket.setAction_type(ActionType.UNCHANGED);
+                    if (ticket.getBatch() != null) {
+                        ticket.getBatch().setTicketsUnchanged(ticket.getBatch().getTicketsUnchanged() + 1);
+                    }
+                }
 
             } else {
+                Task ticketToCreate = new Task();
+                Project prjct = projectRepository.findByJiraKey(ticket.getProjectKey());
 
-                batchService.CreateTasksFromBatch(ticket);
+                ticketToCreate.setProject(prjct);
+                ticketToCreate.setJiraId(ticket.getJiraId());
+                ticketToCreate.setSummary(ticket.getSummary());
+                ticketToCreate.setDescription(ticket.getDescription());
+                ticketToCreate.setStatus(ticket.getStatus());
+                ticketToCreate.setCreated(ticket.getCreated());
+                ticketToCreate.setUpdated(ticket.getUpdated());
+                ticketToCreate.setCharge(ticket.getCharge());
+                ticketToCreate.setAssignedCharge(ticket.getAssignedCharge());
+                ticketToCreate.setReevaluatedCharge(ticket.getReevaluatedCharge());
+                ticketToCreate.setComment(ticket.getComment());
+                ticketToCreate.setPriority(ticket.getPriority());
+                if (ticket.getBatch() != null) {
+                    ticket.getBatch().setTicketsCreated(ticket.getBatch().getTicketsCreated() + 1);
+                }
+                ticket.setAction_type(ActionType.CREATED);
 
-//                countCreatedTickets++;
+                // Assign ticket to user
+
+                String displayName = ticket.getAssigneeName();
+                if (displayName != null) {
+                    String[] names = displayName.split(" ");
+                    if (names.length >= 2) {
+                        String firstName = names[0];
+                        String lastName = names[1];
+                        User user = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+                        if (user != null) {
+                            ticketToCreate.setAssignedTo(user);
+                        }
+                    }
+                }
+
+                // Si le ticket n'existe pas, le sauvegarder
+                taskRepository.save(ticketToCreate);
+                countCreatedTickets++;
             }
         }
 
-        System.out.println("updated : " + countUpdatedTickets) ;
+                System.out.println("updated : " + countUpdatedTickets) ;
         System.out.println("created : " + countCreatedTickets) ;
     }
 }
