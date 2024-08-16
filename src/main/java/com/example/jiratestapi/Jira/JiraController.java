@@ -94,7 +94,7 @@ public class JiraController {
             }
 
             List<Task> tasksByProjectId = taskRepository.findAllByProjectIdAndStatusNot(project.getId() , "Archived");
-            int countTasksByProjectId = tasksByProjectId.size();
+//            int countTasksByProjectId = tasksByProjectId.size();
 
             List<BatchTicket> ticketsList = new ArrayList<>();
             List<Task> ticketsToDelete = new ArrayList<>();
@@ -104,7 +104,6 @@ public class JiraController {
             for (BatchTicket batchTicket : batchTickets) {
                 if (project.getJiraKey().equals(batchTicket.getProjectKey())) {
                     countSyncTickets++;
-//                    System.out.println(incr++ + batchTicket.getProjectKey() + "==" + project.getJiraKey());
                     batchTicket.setBatch(batch);
                     ticketsList.add(batchTicket);
                 }
@@ -126,11 +125,7 @@ public class JiraController {
                 batch.setTicketsUpdated(0);
                 batch.setTotalTicketsSync(countSyncTickets);
                 batch.setTicketsDeleted(ticketsToDelete.size());
-//                if (countSyncTickets < countTasksByProjectId) {
-//                    batch.setTicketsDeleted(countTasksByProjectId - countSyncTickets);
-//                } else {
-//                    batch.setTicketsDeleted(0);
-//                }
+
                 batch.setTicketsUnchanged(0);
                 batch.setProject(project); // Assurez-vous d'associer le batch au project
                 batch.setIsCompleted(true);

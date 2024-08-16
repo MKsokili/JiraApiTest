@@ -21,7 +21,10 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String jiraId;
+    private String jiraKey;
     private String summary;
+
+    @Column(length = 1000)
     private String description;
     private String status;
 

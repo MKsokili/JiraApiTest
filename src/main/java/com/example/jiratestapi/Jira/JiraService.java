@@ -70,7 +70,7 @@ public class JiraService {
         // JQL query to get issues created in the last 5 minutes
         String jql = "created >= -5m";
         SyncAuth syncAuth=syncAuthService.getSyncAuthInstant();
-        String url = syncAuth.getApiUrl()+ "rest/api/2/search?jql=";
+        String url = syncAuth.getApiUrl()+ "/rest/api/2/search?jql=";
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         return response.getBody();
@@ -120,6 +120,7 @@ public class JiraService {
                 ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
                 // ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
                 ticket.setJiraId(issue.get("id").asText());
+                ticket.setJiraKey(issue.get("key").asText());
                 ticket.setSummary(issue.get("fields").get("summary").asText());
                 ticket.setDescription(issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null);
                 ticket.setStatus(issue.get("fields").get("status").get("name").asText());
