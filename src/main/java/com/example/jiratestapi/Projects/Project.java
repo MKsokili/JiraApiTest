@@ -21,6 +21,7 @@ public class Project {
     private Long id;
     private String jiraKey;
     private String name;
+    private Boolean isValid;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
