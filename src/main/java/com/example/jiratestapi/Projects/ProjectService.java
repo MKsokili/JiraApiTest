@@ -38,10 +38,13 @@ public class ProjectService {
     public ResponseWithMsg addProjectKey(Long projectId,String prjctKey) throws Exception {
         Optional<Project> project=projectRepository.findById(projectId);
         boolean isConneted= doesProjectKeyExist(prjctKey);
+        Optional<Project> projectWithSameJiraKey= Optional.ofNullable(projectRepository.findByJiraKey(prjctKey));
+        if(isConneted && projectWithSameJiraKey.isPresent())return new ResponseWithMsg(false,"This  Key already linked with Another project");
         if(!project.isPresent()) return new ResponseWithMsg(false,"Project not Found");
         if(!isConneted) return new ResponseWithMsg(false,"Project Key is not valid");
 
             project.get().setJiraKey(prjctKey);
+            project.get().setIsValid(true);
             projectRepository.save(project.get());
             return  new ResponseWithMsg(true,"Projet Key is saved Successfully");
 
@@ -77,7 +80,10 @@ public class ProjectService {
     public Response getJiraKey(Long projectId) throws Exception {
         Optional<Project> project=projectRepository.findById(projectId);
         String jiraKey=project.get().getJiraKey();
-        boolean exists = doesProjectKeyExist(jiraKey);
-        return new Response(exists,jiraKey);
+        boolean existsInJira = doesProjectKeyExist(jiraKey);// to delete later because we can get the validity from the database while it is stored => it is valid 4
+        //the case where it will fail is where you change the jira key directly from the database  which is not logic
+
+
+        return new Response(project.get().getIsValid()&&existsInJira,jiraKey);
     }
 }
