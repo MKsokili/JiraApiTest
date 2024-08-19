@@ -37,4 +37,14 @@ public class Batch {
     @JsonBackReference
     private Project project;
 
+    public void incrementTicketsUpdated() {
+        this.ticketsUpdated += 1;
+    }
+    public void incrementTicketsCreated() {
+        this.ticketsCreated += 1;
+    }
+    public void incrementTicketsUnchanged() {
+        this.ticketsUnchanged += 1;
+    }
+
 }
