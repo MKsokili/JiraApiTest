@@ -3,6 +3,7 @@ package com.example.jiratestapi.users;
 import java.util.List;
 
 import com.example.jiratestapi.Task.Task;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.annotation.Generated;
@@ -31,6 +32,7 @@ public class User {
     private String lastName;
 
     @OneToMany(mappedBy = "assignedTo" , cascade = CascadeType.ALL)
-    @JsonManagedReference
+//    @JsonManagedReference
+    @JsonIgnore
     List<Task> tasks;
 }
