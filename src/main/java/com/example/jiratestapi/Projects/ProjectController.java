@@ -19,7 +19,7 @@ public class ProjectController {
     ProjectService projectService;
 
     @PostMapping("/{projectid}/jira-conf/{prjctkey}")
-    public ResponseEntity<Response> addProjectKey(@PathVariable Long projectid,@PathVariable String prjctkey) throws Exception {
+    public ResponseEntity<ResponseWithMsg> addProjectKey(@PathVariable Long projectid,@PathVariable String prjctkey) throws Exception {
 
         ResponseWithMsg response=projectService.addProjectKey(projectid,prjctkey);
 

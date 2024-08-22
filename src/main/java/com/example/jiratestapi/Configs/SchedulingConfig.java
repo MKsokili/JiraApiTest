@@ -55,6 +55,7 @@ public class SchedulingConfig {
     @Transactional
 //    @Scheduled(cron = "0 */2 * * * ?")
     public void syncTicketsNightly() throws Exception {
+        System.out.println("start in batch");
         List<BatchTicket> tasks= ticketController.syncTickets();
 
 

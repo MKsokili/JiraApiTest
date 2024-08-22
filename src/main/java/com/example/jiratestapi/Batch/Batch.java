@@ -1,5 +1,6 @@
 package com.example.jiratestapi.Batch;
 
+import com.example.jiratestapi.BatchError.BatchError;
 import com.example.jiratestapi.Projects.Project;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -33,6 +34,9 @@ public class Batch {
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<BatchTicket> batchTickets ;
+    @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<BatchError> batchErrors ;
     @ManyToOne
     @JsonBackReference
     private Project project;

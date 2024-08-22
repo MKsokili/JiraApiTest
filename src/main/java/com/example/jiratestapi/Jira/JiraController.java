@@ -117,7 +117,7 @@ public class JiraController {
                     .filter(task -> !jiraIds.contains(task.getJiraId()))
                     .collect(Collectors.toList());
 
-            if (!ticketsList.isEmpty()||ticketsList.get(0).getBatch()!=null) {
+            if (!ticketsList.isEmpty()) {
                 System.out.println("ticketsList:" + ticketsList.get(0).getSummary());
                 batch.setBatchTickets(ticketsList);
                 batch.setStartedDate(LocalDate.now());
