@@ -48,7 +48,7 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "assigned_to_id")
-    @JsonBackReference
+//    @JsonBackReference
     private User assignedTo;
 
 
