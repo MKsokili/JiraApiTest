@@ -1,6 +1,9 @@
 package com.example.jiratestapi.Batch;
 
 
+import com.example.jiratestapi.BatchError.BatchError;
+import com.example.jiratestapi.BatchError.BatchErrorRepository;
+import com.example.jiratestapi.BatchError.ErrorType;
 import com.example.jiratestapi.BatchTicket.ActionType;
 import com.example.jiratestapi.BatchTicket.BatchTicket;
 import com.example.jiratestapi.Projects.Project;
@@ -13,6 +16,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Service
 @Transactional
 public class BatchService {
@@ -24,7 +30,8 @@ public class BatchService {
 
     @Autowired
     ProjectRepository projectRepository;
-
+    @Autowired
+    BatchErrorRepository batchErrorRepository;
     public void CheckUpdateTasksFromBatch(BatchTicket ticket  , Task ticketToUpdate){
 
         boolean dateChanged = ticket.getUpdated().isAfter(ticketToUpdate.getUpdated());
@@ -45,9 +52,7 @@ public class BatchService {
                 ticket.getBatch().incrementTicketsUpdated();
             }
             ticket.setAction_type(ActionType.UPDATED);
-
-            // Update Assign ticket to user
-
+            // Update Assignee if the name has changed
             String displayName = ticket.getAssigneeName();
             if (displayName != null) {
                 String[] names = displayName.split(" ");
@@ -57,10 +62,22 @@ public class BatchService {
                     User user = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
                     if (user != null) {
                         ticketToUpdate.setAssignedTo(user);
+                    } else {
+                        System.out.println("start in err handling in update");
+                        // Log the error if the assignee is not found
+                        BatchError error = new BatchError(
+                                ticket.getBatch(),
+                                ErrorType.ASSIGNEE_NOT_FOUND,
+                                "Assignee (" + displayName + ") not found for ticket: " + ticket.getJiraKey(),
+                                ticketToUpdate.getJiraId()
+                        );
+                        batchErrorRepository.save(error);
                     }
                 }
             }
+            // Save the updated ticket
             taskRepository.save(ticketToUpdate);
+
         }else {
             ticket.setAction_type(ActionType.UNCHANGED);
             if (ticket.getBatch() != null) {
@@ -75,9 +92,13 @@ public class BatchService {
     public void CreateTasksFromBatch(BatchTicket ticket){
 
         Task ticketToCreate = new Task();
-        Project prjct = projectRepository.findByJiraKey(ticket.getProjectKey());
+        Optional<Project> optionalProject = projectRepository.findByJiraKey(ticket.getProjectKey());
 
-        ticketToCreate.setProject(prjct);
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            ticketToCreate.setProject(project);
+        }
+//        ticketToCreate.setProject(prjct);
         ticketToCreate.setJiraId(ticket.getJiraId());
         ticketToCreate.setJiraKey(ticket.getJiraKey());
         ticketToCreate.setSummary(ticket.getSummary());
@@ -96,8 +117,8 @@ public class BatchService {
         }
         ticket.setAction_type(ActionType.CREATED);
 
-        // Assign ticket to user
 
+        // Assign ticket to user
         String displayName = ticket.getAssigneeName();
         if (displayName != null) {
             String[] names = displayName.split(" ");
@@ -107,15 +128,21 @@ public class BatchService {
                 User user = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
                 if (user != null) {
                     ticketToCreate.setAssignedTo(user);
+                } else {
+                    System.out.println("start in err handling in create");
+
+                    BatchError error = new BatchError(
+                            ticket.getBatch(),
+                            ErrorType.ASSIGNEE_NOT_FOUND,
+                            "Assignee ("+displayName+") not found for ticket: " + ticket.getJiraKey(),
+                            ticket.getJiraKey()
+                    );
+                    batchErrorRepository.save(error);
                 }
             }
         }
 
-        // Si le ticket n'existe pas, le sauvegarder
+        // Save the ticket
         taskRepository.save(ticketToCreate);
-
-
     }
-
-
 }

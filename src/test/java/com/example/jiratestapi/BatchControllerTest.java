@@ -52,7 +52,7 @@ public class BatchControllerTest {
         Batch batch = new Batch(1L, LocalDate.of(2023, 8, 1), true, 5, 10, 15, 20, 50, null, project);
 
         // Mocking repository responses
-        when(projectRepository.findByJiraKey("TEST_KEY")).thenReturn(project);
+        when(projectRepository.findByJiraKey("TEST_KEY")).thenReturn(Optional.of(project));
         when(batchRepository.findByProjectAndStartedDate(project, LocalDate.of(2023, 8, 1))).thenReturn(Optional.of(batch));
 
         // Perform the request and assert the response
@@ -87,7 +87,7 @@ public class BatchControllerTest {
         String date = "2024-08-09";
         LocalDate batchDate = LocalDate.parse(date);
 
-        when(projectRepository.findByJiraKey(projectKey)).thenReturn(new Project());
+        when(projectRepository.findByJiraKey(projectKey)).thenReturn(Optional.of(new Project()));
         when(batchRepository.findByProjectAndStartedDate(any(Project.class), any(LocalDate.class)))
                 .thenReturn(Optional.empty());
 

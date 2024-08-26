@@ -2,6 +2,9 @@ package com.example.jiratestapi.Jira;
 
 import com.example.jiratestapi.Batch.Batch;
 import com.example.jiratestapi.Batch.BatchRepository;
+import com.example.jiratestapi.BatchError.BatchError;
+import com.example.jiratestapi.BatchError.BatchErrorRepository;
+import com.example.jiratestapi.BatchError.ErrorType;
 import com.example.jiratestapi.BatchTicket.ActionType;
 import com.example.jiratestapi.BatchTicket.BatchTicket;
 import com.example.jiratestapi.Projects.Project;
@@ -39,6 +42,7 @@ public class JiraController {
     private TaskRepository taskRepository;
     private ProjectRepository projectRepository;
     private BatchRepository batchRepository;
+    private BatchErrorRepository batchErrorRepository;
     @GetMapping("/create")
     public ResponseEntity<String> createIssue(){
         try{
@@ -81,64 +85,88 @@ public class JiraController {
 
 //    @Transactional
     @PostMapping("/sync")
-    public List<BatchTicket> syncTickets() throws Exception {
-
-        List<BatchTicket> batchTickets = jiraService.fetchTickets();
-
+    public List<BatchTicket> syncTickets() {
+        List<BatchTicket> batchTickets = new ArrayList<>();
         List<Project> projects = projectRepository.findAll();
 
-        for (Project project : projects) {
-            System.out.println("project:" + project.getJiraKey());
-            if (project.getJiraKey() == null) {
-                continue;
-            }
+        try {
+            batchTickets = jiraService.fetchTickets();
 
-            List<Task> tasksByProjectId = taskRepository.findAllByProjectIdAndStatusNot(project.getId() , "Archived");
-//            int countTasksByProjectId = tasksByProjectId.size();
+            for (Project project : projects) {
+                Batch batch = new Batch();
 
-            List<BatchTicket> ticketsList = new ArrayList<>();
-            List<Task> ticketsToDelete = new ArrayList<>();
+                System.out.println("project:" + project.getJiraKey());
+                if (project.getJiraKey() == null) {
+                    continue;
+                }
 
-            int countSyncTickets = 0;
-            Batch batch = new Batch();
-            for (BatchTicket batchTicket : batchTickets) {
-                if (project.getJiraKey().equals(batchTicket.getProjectKey())) {
-                    countSyncTickets++;
-                    batchTicket.setBatch(batch);
-                    ticketsList.add(batchTicket);
+                List<Task> tasksByProjectId = taskRepository.findAllByProjectIdAndStatusNot(project.getId(), "Archived");
+                List<BatchTicket> ticketsList = new ArrayList<>();
+                List<Task> ticketsToDelete = new ArrayList<>();
+
+                int countSyncTickets = 0;
+
+                for (BatchTicket batchTicket : batchTickets) {
+                    if (project.getJiraKey().equals(batchTicket.getProjectKey())) {
+                        countSyncTickets++;
+                        batchTicket.setBatch(batch);
+                        ticketsList.add(batchTicket);
+                    }
+                }
+
+                List<String> jiraIds = ticketsList.stream()
+                        .map(BatchTicket::getJiraId)
+                        .collect(Collectors.toList());
+
+                ticketsToDelete = tasksByProjectId.stream()
+                        .filter(task -> !jiraIds.contains(task.getJiraId()))
+                        .collect(Collectors.toList());
+
+                if (!ticketsList.isEmpty()) {
+                    System.out.println("ticketsList:" + ticketsList.get(0).getSummary());
+                    batch.setBatchTickets(ticketsList);
+                    batch.setStartedDate(LocalDate.now());
+                    batch.setTicketsCreated(0);
+                    batch.setTicketsUpdated(0);
+                    batch.setTotalTicketsSync(countSyncTickets);
+                    batch.setTicketsDeleted(ticketsToDelete.size());
+                    batch.setTicketsUnchanged(0);
+                    batch.setProject(project);
+                    batch.setIsCompleted(true);
+
+                    batchRepository.save(batch);
+                    projectRepository.save(project);
+                } else {
+                    System.out.println("else----");
+                    batch.setIsCompleted(false);
                 }
             }
+        } catch (Exception e) {
+            // Handle the exception and log it to BatchError
 
-            List<String> jiraIds = ticketsList.stream()
-                    .map(BatchTicket::getJiraId)
-                    .collect(Collectors.toList());
+            for (Project project : projects) {
+                Batch batch = new Batch();
+                BatchError batchError = new BatchError();
+                batchError.setBatch(batch);
+                batchError.setErrorType(ErrorType.BATCH_SYNC_ERROR);
+                batchError.setMessage(e.getMessage());
+                batchError.setTimestamp(LocalDateTime.now());
 
-            ticketsToDelete = tasksByProjectId.stream()
-                    .filter(task -> !jiraIds.contains(task.getJiraId()))
-                    .collect(Collectors.toList());
-
-            if (!ticketsList.isEmpty()||ticketsList.get(0).getBatch()!=null) {
-                System.out.println("ticketsList:" + ticketsList.get(0).getSummary());
-                batch.setBatchTickets(ticketsList);
+                batch.setIsCompleted(false);
                 batch.setStartedDate(LocalDate.now());
-                batch.setTicketsCreated(0);
-                batch.setTicketsUpdated(0);
-                batch.setTotalTicketsSync(countSyncTickets);
-                batch.setTicketsDeleted(ticketsToDelete.size());
+                batch.setProject(project);
 
-                batch.setTicketsUnchanged(0);
-                batch.setProject(project); // Assurez-vous d'associer le batch au project
-                batch.setIsCompleted(true);
+                batchErrorRepository.save(batchError);
                 batchRepository.save(batch);
                 projectRepository.save(project);
-            }else{
-                System.out.println("else----");
-                batch.setIsCompleted(false);
-            }
-        }
-        return batchTickets;
 
+            }
+            // Optionally, rethrow the exception if it needs to be handled further up
+        }
+
+        return batchTickets;
     }
+
 
 
 }

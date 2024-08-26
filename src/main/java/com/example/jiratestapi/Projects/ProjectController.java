@@ -1,5 +1,6 @@
 package com.example.jiratestapi.Projects;
 
+import com.example.jiratestapi.SyncAuth.SyncAuth;
 import com.example.jiratestapi.Task.Task;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,18 +13,31 @@ import java.util.Optional;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/projects")
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 
 public class ProjectController {
     ProjectRepository projectRepository;
     ProjectService projectService;
 
     @PostMapping("/{projectid}/jira-conf/{prjctkey}")
-    public ResponseEntity<Response> addProjectKey(@PathVariable Long projectid,@PathVariable String prjctkey) throws Exception {
+    public ResponseEntity<ResponseWithMsg> addProjectKey(@PathVariable Long projectid,@PathVariable String prjctkey) throws Exception {
 
         ResponseWithMsg response=projectService.addProjectKey(projectid,prjctkey);
 
         return new ResponseEntity(response,HttpStatus.OK);
+    }
+    @PostMapping("/{projectid}/reset-key")
+    public ResponseEntity<Void> resetKey(@PathVariable Long projectid)  {
+        try {
+            Project project=projectRepository.findById(projectid).get();
+            project.setJiraKey(null);
+            project.setIsValid(false);
+            projectRepository.save(project);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Indicate failure with 204 No Content
+        }
     }
     @GetMapping("/{projectid}/jira-conf/get-key")
     public ResponseEntity<Response> getProjectKey(@PathVariable Long projectid) throws Exception {
@@ -51,5 +65,8 @@ public class ProjectController {
         return  tasks;
     }
 
-
+    @GetMapping("/getfailedbatches")
+    public List<String> getFailedBatches() {
+        return projectService.getProjectNamesWithIncompleteBatches(); // Call service method
+    }
 }

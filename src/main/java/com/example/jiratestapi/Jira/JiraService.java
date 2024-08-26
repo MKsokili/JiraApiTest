@@ -90,11 +90,12 @@ public class JiraService {
 
 
     public List<BatchTicket> fetchTickets() throws Exception {
-        SyncAuth syncAuth=syncAuthService.getSyncAuthInstant();
+        SyncAuth syncAuth = syncAuthService.getSyncAuthInstant();
         if (syncAuth == null) {
             throw new Exception("SyncAuth is null");
         }
-        else {
+
+        try {
             String url = syncAuth.getApiUrl() + "/rest/api/2/search?jql=";
             HttpEntity<String> entity = new HttpEntity<>(createHeaders());
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
@@ -116,19 +117,19 @@ public class JiraService {
                 }
 
                 BatchTicket ticket = new BatchTicket();
-//            Project project = projectRepository.findByJiraKey();
                 ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
-                // ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
                 ticket.setJiraId(issue.get("id").asText());
                 ticket.setJiraKey(issue.get("key").asText());
                 ticket.setSummary(issue.get("fields").get("summary").asText());
                 ticket.setDescription(issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null);
                 ticket.setStatus(issue.get("fields").get("status").get("name").asText());
+
                 if (issue.get("fields").has("priority") && !issue.get("fields").get("priority").isNull()) {
                     ticket.setPriority(issue.get("fields").get("priority").get("name").asText());
                 } else {
                     ticket.setPriority(null);
                 }
+
                 // Récupération des dates de création et de mise à jour
                 String createdStr = issue.get("fields").get("created").asText();
                 String updatedStr = issue.get("fields").get("updated").asText();
@@ -165,25 +166,16 @@ public class JiraService {
                     ticket.setReevaluatedCharge(null);
                 }
 
-//            if (issue.get("fields").has("comment") && !issue.get("fields").get("comment").isNull()) {
-//                        JsonNode commentsNode = issue.get("fields").get("comment").get("comments");
-//                        if (commentsNode.size() > 0) {
-//                            ticket.setComment(commentsNode.get(0).get("body").asText());
-//                        } else {
-//                            ticket.setComment(null);
-//                        }
-//                    } else {
-//                        ticket.setComment(null);
-//            }
-
-
                 tickets.add(ticket);
             }
             return tickets;
+        } catch (Exception e) {
+            // Capture and rethrow the exception to be handled by the parent method
+            throw new Exception("Connection error while syncing data from the Jira API. This issue may be due to an internet connectivity problem.", e);
         }
-
     }
-    
+
+
 
     public List<BatchTicket> fetchTicketsAssignedToMyEmail() throws Exception {
         // Récupération de l'email de l'utilisateur actuel (supposant que l'authentification est configurée)

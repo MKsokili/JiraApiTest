@@ -11,6 +11,6 @@ public class Response {
     @JsonProperty("isConnected")
     Boolean isConnected;
     @JsonProperty("jiraKey")
-//
     String  jiraKey;
+
 }

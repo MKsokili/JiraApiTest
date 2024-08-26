@@ -74,10 +74,10 @@ public class SyncAuthService {
         SyncAuth syncAuth = getSyncAuthInstant();
 
         if(syncAuth==null||syncAuth.getToken()==null||syncAuth.getApiUrl()==null){
-            return new VerifySyncResponse(false,syncAuth);
+            return new VerifySyncResponse(syncAuth.getIsStopped(),false,syncAuth);
 
         }
         Boolean res = checkIfConnected(syncAuth); // Handle Optional properly
-        return new VerifySyncResponse(res, syncAuth);
+        return new VerifySyncResponse(syncAuth.getIsStopped(),!syncAuth.getIsStopped()&&res, syncAuth);
     }
 }

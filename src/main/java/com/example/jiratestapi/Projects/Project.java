@@ -33,4 +33,12 @@ public class Project {
         batches.add(batch);
         batch.setProject(this);  // Correction ici
     }
+    public boolean hasIncompleteBatch() {
+        if (batches == null || batches.isEmpty()) {
+            return false; // No batches, so nothing to check
+        }
+        // Get the last batch
+        Batch lastBatch = batches.get(batches.size() - 1);
+        return lastBatch.getIsCompleted() == false; // Return true if last batch is incomplete
+    }
 }
