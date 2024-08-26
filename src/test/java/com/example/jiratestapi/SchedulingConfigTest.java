@@ -97,7 +97,7 @@ public class SchedulingConfigTest {
         when(ticketController.syncTickets()).thenReturn(Arrays.asList(batchTicket));
         when(batchRepository.findById(anyLong())).thenReturn(Optional.of(batch));
         when(taskRepository.findAll()).thenReturn(Collections.singletonList(task));
-        when(projectRepository.findByJiraKey(any())).thenReturn(new Project());
+        when(projectRepository.findByJiraKey(any())).thenReturn(Optional.of(new Project()));
 //        lenient().when(userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(anyString(), anyString())).thenReturn(new User());
         when(userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(anyString(), anyString())).thenReturn(new User());
 
