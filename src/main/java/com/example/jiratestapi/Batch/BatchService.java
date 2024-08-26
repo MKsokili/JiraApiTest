@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -68,7 +69,7 @@ public class BatchService {
                                 ticket.getBatch(),
                                 ErrorType.ASSIGNEE_NOT_FOUND,
                                 "Assignee (" + displayName + ") not found for ticket: " + ticket.getJiraKey(),
-                                null
+                                ticketToUpdate.getJiraId()
                         );
                         batchErrorRepository.save(error);
                     }
@@ -91,9 +92,13 @@ public class BatchService {
     public void CreateTasksFromBatch(BatchTicket ticket){
 
         Task ticketToCreate = new Task();
-        Project prjct = projectRepository.findByJiraKey(ticket.getProjectKey());
+        Optional<Project> optionalProject = projectRepository.findByJiraKey(ticket.getProjectKey());
 
-        ticketToCreate.setProject(prjct);
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            ticketToCreate.setProject(project);
+        }
+//        ticketToCreate.setProject(prjct);
         ticketToCreate.setJiraId(ticket.getJiraId());
         ticketToCreate.setJiraKey(ticket.getJiraKey());
         ticketToCreate.setSummary(ticket.getSummary());
@@ -130,7 +135,7 @@ public class BatchService {
                             ticket.getBatch(),
                             ErrorType.ASSIGNEE_NOT_FOUND,
                             "Assignee ("+displayName+") not found for ticket: " + ticket.getJiraKey(),
-                            null
+                            ticket.getJiraKey()
                     );
                     batchErrorRepository.save(error);
                 }

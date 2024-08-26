@@ -17,4 +17,13 @@ public class TaskController {
     public List<Task> getTasksByProjectId(@PathVariable Long projectId){
         return  taskRepository.findAllByProjectId(projectId);
     }
+    @GetMapping("/get-id/{jirakey}")
+        public Long getIdByJiraKey(@PathVariable String jirakey){
+        return  taskRepository.findOneByJiraKey(jirakey).getId();
+    }
+
+    @GetMapping("/get/{taskId}")
+    public Task getOneTask(@PathVariable Long taskId){
+        return  taskRepository.findById(taskId).get();
+    }
 }

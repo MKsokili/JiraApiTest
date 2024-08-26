@@ -14,7 +14,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -38,7 +40,7 @@ public class ProjectService {
     public ResponseWithMsg addProjectKey(Long projectId,String prjctKey) throws Exception {
         Optional<Project> project=projectRepository.findById(projectId);
         boolean isConneted= doesProjectKeyExist(prjctKey);
-        Optional<Project> projectWithSameJiraKey= Optional.ofNullable(projectRepository.findByJiraKey(prjctKey));
+        Optional<Project> projectWithSameJiraKey= (projectRepository.findByJiraKey(prjctKey));
         if(isConneted && projectWithSameJiraKey.isPresent())return new ResponseWithMsg(false,"This  Key already linked with Another project");
         if(!project.isPresent()) return new ResponseWithMsg(false,"Project not Found");
         if(!isConneted) return new ResponseWithMsg(false,"Project Key is not valid");
@@ -85,5 +87,12 @@ public class ProjectService {
 
 
         return new Response(project.get().getIsValid()&&existsInJira,jiraKey);
+    }
+    public List<String> getProjectNamesWithIncompleteBatches() {
+        List<Project> projects = projectRepository.findAll();
+        return projects.stream()
+                .filter(Project::hasIncompleteBatch)
+                .map(Project::getJiraKey)
+                .collect(Collectors.toList());
     }
 }

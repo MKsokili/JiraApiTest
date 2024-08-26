@@ -31,13 +31,14 @@ public class BatchError {
     private ErrorType errorType;
     private String message;
     private LocalDateTime timestamp;
-    private Long taskId;
+    private String jiraId;
+    private Boolean checked=false;
 
-    public BatchError(Batch batch, ErrorType errorType, String message,  Long taskId) {
+    public BatchError(Batch batch, ErrorType errorType, String message,  String taskId) {
         this.batch = batch;
         this.errorType = errorType;
         this.message = message;
-        this.taskId = taskId;
+        this.jiraId = jiraId;
     }
     // Getters and setters
 
