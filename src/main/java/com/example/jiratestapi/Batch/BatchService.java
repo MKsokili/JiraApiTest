@@ -8,6 +8,7 @@ import com.example.jiratestapi.BatchTicket.ActionType;
 import com.example.jiratestapi.BatchTicket.BatchTicket;
 import com.example.jiratestapi.Projects.Project;
 import com.example.jiratestapi.Projects.ProjectRepository;
+import com.example.jiratestapi.Projects.ProjectService;
 import com.example.jiratestapi.Task.Task;
 import com.example.jiratestapi.Task.TaskRepository;
 import com.example.jiratestapi.users.User;
@@ -16,8 +17,11 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -27,11 +31,14 @@ public class BatchService {
     TaskRepository taskRepository;
     @Autowired
     UserRepository userRepository;
-
+  @Autowired
+  BatchRepository batchRepository;
     @Autowired
     ProjectRepository projectRepository;
     @Autowired
     BatchErrorRepository batchErrorRepository;
+    @Autowired
+    ProjectService projectService;
     public void CheckUpdateTasksFromBatch(BatchTicket ticket  , Task ticketToUpdate){
 
         boolean dateChanged = ticket.getUpdated().isAfter(ticketToUpdate.getUpdated());
@@ -144,5 +151,35 @@ public class BatchService {
 
         // Save the ticket
         taskRepository.save(ticketToCreate);
+    }
+    public List<Task> getValidJiraidsFromDataBase(){
+        List<Task> ticketsInDatabase = taskRepository.findAll();
+
+        return ticketsInDatabase.stream()
+                .filter(task -> {
+                    if(task.getStatus()=="Archived"){
+                        return false;
+                    }
+                    Project project = task.getProject();
+                    if (project == null) {
+                        return false; // Ignore tasks without a project
+                    }
+                    String jiraKey = project.getJiraKey();
+                    if (jiraKey == null) {
+                        return false; // Ignore tasks with a null Jira key
+                    }
+                    try {
+                        return projectService.doesProjectKeyExist(jiraKey); // Check if the Jira key is valid
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+
+
+    }
+    public Optional<Batch> findBatchByToday() {
+        LocalDate today = LocalDate.now();
+        return batchRepository.findFirstByStartedDate(today);
     }
 }

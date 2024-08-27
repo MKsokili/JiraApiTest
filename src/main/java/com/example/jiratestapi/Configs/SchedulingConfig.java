@@ -5,6 +5,7 @@ import com.example.jiratestapi.Batch.BatchRepository;
 import com.example.jiratestapi.Batch.BatchService;
 import com.example.jiratestapi.Projects.Project;
 import com.example.jiratestapi.Projects.ProjectRepository;
+import com.example.jiratestapi.Projects.ProjectService;
 import com.example.jiratestapi.SyncAuth.SyncAuth;
 import com.example.jiratestapi.SyncAuth.SyncAuthService;
 import com.example.jiratestapi.Task.Task;
@@ -42,6 +43,8 @@ public class SchedulingConfig {
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
+    private ProjectService projectService;
+    @Autowired
 
     private TaskRepository taskRepository;
 
@@ -57,10 +60,17 @@ public class SchedulingConfig {
     private BatchTicketRepository batchTicketRepository;
     // @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
-//    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     public void syncTicketsNightly() throws Exception {
         System.out.println("start in batch");
         SyncAuth sync = syncAuthService.getSyncAuthInstant();
+        Optional<Batch> todayBatch = batchService.findBatchByToday();
+        if (todayBatch.isPresent()) {
+            System.out.println("this batch exist already ");
+            return;
+        }
+
+
         if (!sync.getIsStopped() && syncAuthService.checkIfConnected(sync)) {
             List<BatchTicket> tasks = ticketController.syncTickets();
 
@@ -79,7 +89,10 @@ public class SchedulingConfig {
                     .collect(Collectors.toList());
 
             // Récupération des tickets existants dans la base de données qui ne sont plus présents dans Jira
-            List<Task> ticketsInDatabase = taskRepository.findAll();
+            List<Task> ticketsInDatabase = batchService.getValidJiraidsFromDataBase();
+
+
+
             List<Task> ticketsToDelete = new ArrayList<>();
 
             if (ticketsInDatabase != null && !ticketsInDatabase.isEmpty()) {
