@@ -29,6 +29,8 @@ public class SyncAuthService {
     public void create(String url,String token,String email) {
         SyncAuth auth = getSyncAuthInstant();
         auth.setEmail(email);
+        auth.setIsConnected(true);
+        auth.setIsStopped(false);
         auth.setToken(token);
         auth.setApiUrl(url);
         syncAuthRepository.save(auth);

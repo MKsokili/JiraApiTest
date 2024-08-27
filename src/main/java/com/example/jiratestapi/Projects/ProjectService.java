@@ -89,10 +89,16 @@ public class ProjectService {
         return new Response(project.get().getIsValid()&&existsInJira,jiraKey);
     }
     public List<String> getProjectNamesWithIncompleteBatches() {
+        // Retrieve all projects from the repository
         List<Project> projects = projectRepository.findAll();
+
+        // Stream through the list of projects
         return projects.stream()
+
                 .filter(Project::hasIncompleteBatch)
-                .map(Project::getJiraKey)
+
+                .map(Project::getName)
+
                 .collect(Collectors.toList());
     }
 }

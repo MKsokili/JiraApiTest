@@ -9,6 +9,7 @@ import com.example.jiratestapi.BatchTicket.ActionType;
 import com.example.jiratestapi.BatchTicket.BatchTicket;
 import com.example.jiratestapi.Projects.Project;
 import com.example.jiratestapi.Projects.ProjectRepository;
+import com.example.jiratestapi.Projects.ProjectService;
 import com.example.jiratestapi.Task.Task;
 import com.example.jiratestapi.BatchTicket.BatchTicketRepository;
 import com.example.jiratestapi.Task.TaskRepository;
@@ -41,6 +42,7 @@ public class JiraController {
     private BatchTicketRepository batchTicketRepository;
     private TaskRepository taskRepository;
     private ProjectRepository projectRepository;
+    private ProjectService projectService;
     private BatchRepository batchRepository;
     private BatchErrorRepository batchErrorRepository;
     @GetMapping("/create")
@@ -85,20 +87,22 @@ public class JiraController {
 
 //    @Transactional
     @PostMapping("/sync")
-    public List<BatchTicket> syncTickets() {
+    public List<BatchTicket> syncTickets() throws Exception {
         List<BatchTicket> batchTickets = new ArrayList<>();
         List<Project> projects = projectRepository.findAll();
-
+        List<String> keys =new ArrayList<>();
         try {
             batchTickets = jiraService.fetchTickets();
 
             for (Project project : projects) {
-                Batch batch = new Batch();
-
                 System.out.println("project:" + project.getJiraKey());
-                if (project.getJiraKey() == null) {
+                if (project.getJiraKey() == null||!projectService.doesProjectKeyExist(project.getJiraKey())) {
+                    System.out.println("the project is not valid jira key"+project.getJiraKey());
                     continue;
                 }
+                keys.add(project.getJiraKey());
+                Batch batch = new Batch();
+                System.out.println("the project is valid =>"+project.getJiraKey());
 
                 List<Task> tasksByProjectId = taskRepository.findAllByProjectIdAndStatusNot(project.getId(), "Archived");
                 List<BatchTicket> ticketsList = new ArrayList<>();
@@ -141,10 +145,15 @@ public class JiraController {
                     batch.setIsCompleted(false);
                 }
             }
+            batchTickets.removeIf(e -> !keys.contains(e.getProjectKey()));
+
         } catch (Exception e) {
             // Handle the exception and log it to BatchError
 
             for (Project project : projects) {
+                if (project.getJiraKey() == null||!projectService.doesProjectKeyExist(project.getJiraKey())) {
+                    continue;
+                }
                 Batch batch = new Batch();
                 BatchError batchError = new BatchError();
                 batchError.setBatch(batch);

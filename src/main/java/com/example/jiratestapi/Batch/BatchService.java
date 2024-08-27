@@ -63,7 +63,8 @@ public class BatchService {
                     if (user != null) {
                         ticketToUpdate.setAssignedTo(user);
                     } else {
-                        System.out.println("start in err handling in update");
+//                        Project project=
+//                        System.out.println("start in err handling in update");
                         // Log the error if the assignee is not found
                         BatchError error = new BatchError(
                                 ticket.getBatch(),
@@ -77,7 +78,6 @@ public class BatchService {
             }
             // Save the updated ticket
             taskRepository.save(ticketToUpdate);
-
         }else {
             ticket.setAction_type(ActionType.UNCHANGED);
             if (ticket.getBatch() != null) {
