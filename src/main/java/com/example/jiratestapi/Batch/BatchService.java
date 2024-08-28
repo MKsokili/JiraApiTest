@@ -77,7 +77,7 @@ public class BatchService {
                                 ticket.getBatch(),
                                 ErrorType.ASSIGNEE_NOT_FOUND,
                                 "Assignee (" + displayName + ") not found for ticket: " + ticket.getJiraKey(),
-                                ticketToUpdate.getJiraId()
+                                ticketToUpdate.getJiraKey()
                         );
                         batchErrorRepository.save(error);
                     }

@@ -38,7 +38,7 @@ public class BatchError {
         this.batch = batch;
         this.errorType = errorType;
         this.message = message;
-        this.jiraId = jiraId;
+        this.jiraId = taskId;
     }
     // Getters and setters
 
