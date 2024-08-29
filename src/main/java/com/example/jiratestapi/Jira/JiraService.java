@@ -19,6 +19,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -121,7 +123,32 @@ public class JiraService {
                 ticket.setJiraId(issue.get("id").asText());
                 ticket.setJiraKey(issue.get("key").asText());
                 ticket.setSummary(issue.get("fields").get("summary").asText());
-                ticket.setDescription(issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null);
+                String rawDescription = issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null;
+                if (rawDescription != null) {
+                    // Define patterns with MULTILINE flag for lists
+                    Pattern bulletListPattern = Pattern.compile("^\\*\\s+", Pattern.MULTILINE);
+                    Pattern numberedListPattern = Pattern.compile("^#\\s+", Pattern.MULTILINE);
+
+                    // Replace bullet lists with dashes
+                    Matcher bulletMatcher = bulletListPattern.matcher(rawDescription);
+                    String cleanedDescription = bulletMatcher.replaceAll("- ");
+
+                    // Replace numbered lists with dashes
+                    Matcher numberedMatcher = numberedListPattern.matcher(cleanedDescription);
+                    cleanedDescription = numberedMatcher.replaceAll("- ");
+
+                    // Continue with other replacements to remove formatting styles
+                    cleanedDescription = cleanedDescription
+                            .replaceAll("\\*(.*?)\\*", "$1")  // Remove bold styling but keep text
+                            .replaceAll("_(.*?)_", "$1")      // Remove italic styling but keep text
+                            .replaceAll("\\+(.*?)\\+", "$1")  // Remove underline styling but keep text
+                            .replaceAll("\\{color:[^}]+\\}", "")  // Remove color styling
+                            .replaceAll("\\{[^}]+\\}", "");  // Remove any other braces content
+
+                    ticket.setDescription(cleanedDescription);
+                } else {
+                    ticket.setDescription(null);
+                }
                 ticket.setStatus(issue.get("fields").get("status").get("name").asText());
 
                 if (issue.get("fields").has("priority") && !issue.get("fields").get("priority").isNull()) {

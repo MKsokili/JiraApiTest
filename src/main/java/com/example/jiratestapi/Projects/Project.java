@@ -26,7 +26,7 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private  List<Batch> batches;
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project" , cascade = CascadeType.ALL ,   fetch = FetchType.LAZY)
     @JsonManagedReference
     List<Task> issues;
     public void addBatch(Batch batch) {

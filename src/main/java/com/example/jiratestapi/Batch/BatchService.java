@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,8 +65,9 @@ public class BatchService {
             if (displayName != null) {
                 String[] names = displayName.split(" ");
                 if (names.length >= 2) {
-                    String firstName = names[0];
-                    String lastName = names[1];
+                    String firstName = names[0]; // Le premier mot est toujours le prénom
+                    // Combine tous les mots après le premier pour former le nom de famille
+                    String lastName = String.join(" ", Arrays.copyOfRange(names, 1, names.length));
                     User user = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
                     if (user != null) {
                         ticketToUpdate.setAssignedTo(user);
