@@ -76,7 +76,7 @@ class SyncAuthControllerTest {
     @Test
     void testVerifyConnectSuccess() throws Exception {
         // Given
-        VerifySyncResponse response = new VerifySyncResponse(true, null);
+        VerifySyncResponse response = new VerifySyncResponse(true,true, null);
         when(syncAuthService.verifyIfConnected()).thenReturn(response);
 
         // When & Then

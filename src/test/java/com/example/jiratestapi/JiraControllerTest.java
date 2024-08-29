@@ -74,7 +74,7 @@ public class JiraControllerTest {
         // Mocking service and repository methods
         when(jiraService.fetchTickets()).thenReturn(batchTickets);
         when(projectRepository.findAll()).thenReturn(projects);
-        when(taskRepository.findAllByProjectId(1L)).thenReturn(new ArrayList<>());
+        when(taskRepository.findAllByProjectIdAndStatusNot(1L , "Archived")).thenReturn(new ArrayList<>());
 
         // Perform the request and assert the response
         mockMvc.perform(post("/sync"))

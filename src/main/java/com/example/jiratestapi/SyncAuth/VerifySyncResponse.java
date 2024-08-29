@@ -9,6 +9,8 @@ import java.util.Optional;
 @AllArgsConstructor
 @Data
 public class VerifySyncResponse {
+    @JsonProperty("isStopped")
+    Boolean isStopped;
     @JsonProperty("isConnected")
 Boolean isConnected;
     @JsonProperty("data")

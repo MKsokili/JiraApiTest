@@ -19,6 +19,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -70,7 +72,7 @@ public class JiraService {
         // JQL query to get issues created in the last 5 minutes
         String jql = "created >= -5m";
         SyncAuth syncAuth=syncAuthService.getSyncAuthInstant();
-        String url = syncAuth.getApiUrl()+ "rest/api/2/search?jql=";
+        String url = syncAuth.getApiUrl()+ "/rest/api/2/search?jql=";
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         return response.getBody();
@@ -90,12 +92,13 @@ public class JiraService {
 
 
     public List<BatchTicket> fetchTickets() throws Exception {
-        SyncAuth syncAuth=syncAuthService.getSyncAuthInstant();
+        SyncAuth syncAuth = syncAuthService.getSyncAuthInstant();
         if (syncAuth == null) {
             throw new Exception("SyncAuth is null");
         }
-        else {
-            String url = syncAuth.getApiUrl() + "rest/api/2/search?jql=";
+
+        try {
+            String url = syncAuth.getApiUrl() + "/rest/api/2/search?jql=";
             HttpEntity<String> entity = new HttpEntity<>(createHeaders());
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
@@ -116,18 +119,44 @@ public class JiraService {
                 }
 
                 BatchTicket ticket = new BatchTicket();
-//            Project project = projectRepository.findByJiraKey();
                 ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
-                // ticket.setProjectKey(issue.get("fields").get("project").get("key").asText());
                 ticket.setJiraId(issue.get("id").asText());
+                ticket.setJiraKey(issue.get("key").asText());
                 ticket.setSummary(issue.get("fields").get("summary").asText());
-                ticket.setDescription(issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null);
+                String rawDescription = issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null;
+                if (rawDescription != null) {
+                    // Define patterns with MULTILINE flag for lists
+                    Pattern bulletListPattern = Pattern.compile("^\\*\\s+", Pattern.MULTILINE);
+                    Pattern numberedListPattern = Pattern.compile("^#\\s+", Pattern.MULTILINE);
+
+                    // Replace bullet lists with dashes
+                    Matcher bulletMatcher = bulletListPattern.matcher(rawDescription);
+                    String cleanedDescription = bulletMatcher.replaceAll("- ");
+
+                    // Replace numbered lists with dashes
+                    Matcher numberedMatcher = numberedListPattern.matcher(cleanedDescription);
+                    cleanedDescription = numberedMatcher.replaceAll("- ");
+
+                    // Continue with other replacements to remove formatting styles
+                    cleanedDescription = cleanedDescription
+                            .replaceAll("\\*(.*?)\\*", "$1")  // Remove bold styling but keep text
+                            .replaceAll("_(.*?)_", "$1")      // Remove italic styling but keep text
+                            .replaceAll("\\+(.*?)\\+", "$1")  // Remove underline styling but keep text
+                            .replaceAll("\\{color:[^}]+\\}", "")  // Remove color styling
+                            .replaceAll("\\{[^}]+\\}", "");  // Remove any other braces content
+
+                    ticket.setDescription(cleanedDescription);
+                } else {
+                    ticket.setDescription(null);
+                }
                 ticket.setStatus(issue.get("fields").get("status").get("name").asText());
+
                 if (issue.get("fields").has("priority") && !issue.get("fields").get("priority").isNull()) {
                     ticket.setPriority(issue.get("fields").get("priority").get("name").asText());
                 } else {
                     ticket.setPriority(null);
                 }
+
                 // Récupération des dates de création et de mise à jour
                 String createdStr = issue.get("fields").get("created").asText();
                 String updatedStr = issue.get("fields").get("updated").asText();
@@ -164,25 +193,16 @@ public class JiraService {
                     ticket.setReevaluatedCharge(null);
                 }
 
-//            if (issue.get("fields").has("comment") && !issue.get("fields").get("comment").isNull()) {
-//                        JsonNode commentsNode = issue.get("fields").get("comment").get("comments");
-//                        if (commentsNode.size() > 0) {
-//                            ticket.setComment(commentsNode.get(0).get("body").asText());
-//                        } else {
-//                            ticket.setComment(null);
-//                        }
-//                    } else {
-//                        ticket.setComment(null);
-//            }
-
-
                 tickets.add(ticket);
             }
             return tickets;
+        } catch (Exception e) {
+            // Capture and rethrow the exception to be handled by the parent method
+            throw new Exception("Connection error while syncing data from the Jira API. This issue may be due to an internet connectivity problem.", e);
         }
-
     }
-    
+
+
 
     public List<BatchTicket> fetchTicketsAssignedToMyEmail() throws Exception {
         // Récupération de l'email de l'utilisateur actuel (supposant que l'authentification est configurée)

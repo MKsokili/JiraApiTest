@@ -29,14 +29,19 @@ public class SyncAuthService {
     public void create(String url,String token,String email) {
         SyncAuth auth = getSyncAuthInstant();
         auth.setEmail(email);
+        auth.setIsConnected(true);
+        auth.setIsStopped(false);
         auth.setToken(token);
         auth.setApiUrl(url);
         syncAuthRepository.save(auth);
     }
 
     public SyncAuth getSyncAuthInstant() {
-        Optional<SyncAuth> list =syncAuthRepository.findById(1L);
-        return list.get();
+        List<SyncAuth> syncAuthList = syncAuthRepository.findAll();
+        if(syncAuthList.isEmpty()){
+            return new SyncAuth();
+        }
+        return syncAuthList.get(0);
     }
     public Boolean checkIfConnected(SyncAuth syn) {
         String auth = syn.getEmail() + ":" + syn.getToken();
@@ -61,16 +66,20 @@ public class SyncAuthService {
                 return false;
             }
         } catch (RestClientException e) {
-            // Log the exception for debugging
-            System.err.println("Exception occurred while connecting: " + e.getMessage());
+            // Log the exception for debuggingSystem.err.println("Exception occurred while connecting: " + e.getMessage());
             return false;
         }
     }
 
 
     public VerifySyncResponse verifyIfConnected() {
-        Optional<SyncAuth> syncAuth = syncAuthRepository.findById(1L);
-        Boolean res = checkIfConnected(syncAuth.orElse(null)); // Handle Optional properly
-        return new VerifySyncResponse(res, syncAuth.orElse(null));
+        SyncAuth syncAuth = getSyncAuthInstant();
+
+        if(syncAuth==null||syncAuth.getToken()==null||syncAuth.getApiUrl()==null){
+            return new VerifySyncResponse(syncAuth.getIsStopped(),false,syncAuth);
+
+        }
+        Boolean res = checkIfConnected(syncAuth); // Handle Optional properly
+        return new VerifySyncResponse(syncAuth.getIsStopped(),!syncAuth.getIsStopped()&&res, syncAuth);
     }
 }

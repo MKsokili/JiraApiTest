@@ -20,5 +20,6 @@ public class SyncAuth {
     private String token;
     private String email;
     private Boolean isConnected;
+    private Boolean isStopped;
 
 }
