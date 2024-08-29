@@ -25,7 +25,7 @@ public class Task {
     private String jiraKey;
     private String summary;
 
-    @Column(length = 1000)
+    @Column(length = 1500)
     private String description;
     private String status;
 

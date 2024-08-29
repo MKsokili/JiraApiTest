@@ -27,7 +27,7 @@ public class BatchTicket {
     private String projectKey;
     private String summary;
 
-    @Column(length = 1000)
+    @Column(length = 1500)
     private String description;
     private String status;
 
