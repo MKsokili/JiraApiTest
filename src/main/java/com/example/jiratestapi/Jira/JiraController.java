@@ -151,7 +151,7 @@ public class JiraController {
             // Handle the exception and log it to BatchError
 
             for (Project project : projects) {
-                if (project.getJiraKey() == null||!projectService.doesProjectKeyExist(project.getJiraKey())) {
+                if (project.getJiraKey() == null||!project.getIsValid()) {
                     continue;
                 }
                 Batch batch = new Batch();

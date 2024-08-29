@@ -35,6 +35,8 @@ public class SyncAuthController {
         try {
             SyncAuth sync=syncAuthService.getSyncAuthInstant();
             VerifySyncResponse response= syncAuthService.verifyIfConnected();
+            sync.setIsConnected(response.getIsConnected());
+            syncAuthRepository.save(sync);
             return new ResponseEntity<>(response,HttpStatus.OK);
         }catch (Exception e){
             e.printStackTrace();
