@@ -6,6 +6,7 @@ import com.example.jiratestapi.Projects.Project;
 import com.example.jiratestapi.users.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,11 +44,13 @@ public class Task {
 
 
     @ManyToOne
-    @JsonBackReference
+    @JsonIgnoreProperties(value = {"issues" , "batches" })
+//    @JsonBackReference
     private Project project;
 
     @ManyToOne
     @JoinColumn(name = "assigned_to_id")
+    @JsonIgnoreProperties(value = {"tasks"})
 //    @JsonBackReference
     private User assignedTo;
 

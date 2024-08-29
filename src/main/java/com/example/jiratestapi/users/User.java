@@ -32,7 +32,7 @@ public class User {
     private String lastName;
 
     @OneToMany(mappedBy = "assignedTo" , cascade = CascadeType.ALL)
-//    @JsonManagedReference
-    @JsonIgnore
+    @JsonManagedReference
+//    @JsonIgnore
     List<Task> tasks;
 }
