@@ -75,10 +75,7 @@ public class JiraController {
         return jiraService.fetchTickets();
     }
 
-    @GetMapping("/mine")
-    public List<BatchTicket> getMyTickets() throws Exception {
-        return jiraService.fetchTicketsAssignedToMyEmail();
-    }
+
 
     @GetMapping("/fetchByProject/{projectKey}")
     public List<BatchTicket> getMyProjectTickets(@PathVariable String projectKey) throws Exception {

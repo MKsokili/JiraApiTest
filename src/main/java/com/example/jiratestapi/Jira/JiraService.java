@@ -191,19 +191,6 @@ public class JiraService {
 
 
 
-    public List<BatchTicket> fetchTicketsAssignedToMyEmail() throws Exception {
-        // Récupération de l'email de l'utilisateur actuel (supposant que l'authentification est configurée)
-        String currentUserEmail = "Chaimae Rachdi";
-
-        // Récupération des tickets assignés à l'email de l'utilisateur actuel
-        List<BatchTicket> allTickets = fetchTickets();
-        return allTickets.stream()
-                         .filter(ticket -> currentUserEmail.equals(ticket.getAssigneeName()))
-                         .collect(Collectors.toList());
-    }
-
-
-
     public List<BatchTicket> fetchTicketsByProject(String projectKey) throws Exception {
         SyncAuth syncAuth=syncAuthService.getSyncAuthInstant();
 
