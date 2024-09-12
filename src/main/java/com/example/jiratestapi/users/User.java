@@ -33,6 +33,5 @@ public class User {
 
     @OneToMany(mappedBy = "assignedTo" , cascade = CascadeType.ALL)
     @JsonManagedReference
-//    @JsonIgnore
     List<Task> tasks;
 }

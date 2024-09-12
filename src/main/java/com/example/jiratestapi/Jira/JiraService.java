@@ -125,11 +125,9 @@ public class JiraService {
                 ticket.setSummary(issue.get("fields").get("summary").asText());
                 String rawDescription = issue.get("fields").has("description") ? issue.get("fields").get("description").asText() : null;
                 if (rawDescription != null) {
-                    // Define patterns with MULTILINE flag for lists
                     Pattern bulletListPattern = Pattern.compile("^\\*\\s+", Pattern.MULTILINE);
                     Pattern numberedListPattern = Pattern.compile("^#\\s+", Pattern.MULTILINE);
 
-                    // Replace bullet lists with dashes
                     Matcher bulletMatcher = bulletListPattern.matcher(rawDescription);
                     String cleanedDescription = bulletMatcher.replaceAll("- ");
 

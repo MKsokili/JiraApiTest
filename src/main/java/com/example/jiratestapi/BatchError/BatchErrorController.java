@@ -56,7 +56,6 @@ public class BatchErrorController {
             if (!errorsList.isEmpty()) {
                 errorsList.stream().forEach(e->{
                     e.setChecked(true);
-                    System.out.println("The error with ID: " + e.getId() + " is checked");
                 });
 
                 return ResponseEntity.ok("Done");
@@ -66,17 +65,11 @@ public class BatchErrorController {
             }
 
         } catch (Exception e) {
-            // Replace System.out with proper logging
-            // log.error("Exception occurred while checking error", e);
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request");
         }
     }
 
-
-//    @GetMapping("/all")
-//    public List<Batch> getProjectBatches() {
-//        return batchRepository.findAll();
-//    }
 
 
 

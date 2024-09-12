@@ -39,7 +39,6 @@ class SyncAuthServiceTest {
 
     @Test
     void create() {
-        // Arrange
         SyncAuth mockAuth = mock(SyncAuth.class);
         when(syncAuthRepository.findById(1L)).thenReturn(Optional.of(mockAuth));
 
@@ -73,16 +72,13 @@ class SyncAuthServiceTest {
 
     @Test
     void getSyncAuth_whenNotFound() {
-        // Arrange
         when(syncAuthRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () -> syncAuthService.getSyncAuthInstant());
     }
 
     @Test
     void checkIfConnected_success() {
-        // Arrange
         SyncAuth mockAuth = mock(SyncAuth.class);
         when(mockAuth.getEmail()).thenReturn("test@example.com");
         when(mockAuth.getToken()).thenReturn("sampleToken");
@@ -92,10 +88,8 @@ class SyncAuthServiceTest {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(responseEntity);
 
-        // Act
         Boolean result = syncAuthService.checkIfConnected(mockAuth);
 
-        // Assert
         assertTrue(result);
     }
 

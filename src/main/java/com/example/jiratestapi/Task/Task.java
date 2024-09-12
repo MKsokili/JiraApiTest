@@ -45,7 +45,6 @@ public class Task {
 
     @ManyToOne
     @JsonIgnoreProperties(value = {"issues" , "batches" })
-//    @JsonBackReference
     private Project project;
 
     @ManyToOne

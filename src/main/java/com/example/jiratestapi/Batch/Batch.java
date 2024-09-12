@@ -17,7 +17,6 @@ import java.util.List;
 @Data
 @Entity
 @NoArgsConstructor
-//@AllArgsConstructor
 public class Batch {
 
     @Id
@@ -31,7 +30,6 @@ public class Batch {
     private Integer ticketsUnchanged;
     private Integer totalTicketsSync;
 
-    //add errors fields and statistiques and so
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<BatchTicket> batchTickets ;
@@ -39,7 +37,6 @@ public class Batch {
     @JsonManagedReference
     private List<BatchError> batchErrors ;
     @ManyToOne
-//    @JsonBackReference
     @JsonIgnoreProperties(value={"issues" , "batches"})
     private Project project;
 

@@ -53,7 +53,6 @@ public class BatchService {
             ticketToUpdate.setCharge(ticket.getCharge());
             ticketToUpdate.setComment(ticket.getComment());
             ticketToUpdate.setPriority(ticket.getPriority());
-            //if (!ticketToUpdate.getUpdated().equals(ticket.getUpdated())) {
             ticketToUpdate.setUpdated(ticket.getUpdated());
             if (ticket.getBatch() != null) {
 //                        ticket.getBatch().setTicketsUpdated(ticket.getBatch().getTicketsUpdated() + 1);
@@ -164,14 +163,14 @@ public class BatchService {
                     }
                     Project project = task.getProject();
                     if (project == null) {
-                        return false; // Ignore tasks without a project
+                        return false;
                     }
                     String jiraKey = project.getJiraKey();
                     if (jiraKey == null) {
-                        return false; // Ignore tasks with a null Jira key
+                        return false;
                     }
                     try {
-                        return projectService.doesProjectKeyExist(jiraKey); // Check if the Jira key is valid
+                        return projectService.doesProjectKeyExist(jiraKey);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
