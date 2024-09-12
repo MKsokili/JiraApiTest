@@ -102,20 +102,13 @@ public class SchedulingConfigTest {
         when(userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(anyString(), anyString())).thenReturn(new User());
 
 
-        // If `projectRepository.findByJiraKey` or `userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase`
-        // are not needed in this test, don't stub them.
-        // If needed, make sure to use them correctly or make the stubbing lenient.
 
-        // Call the method under test
         schedulingConfig.syncTicketsNightly();
 
-        // Verify interactions
         verify(taskRepository, times(1)).deleteAll(any());
         verify(taskRepository, times(1)).save(any());
         verify(batchTicketRepository, never()).saveAll(any());
-        // Verify userRepository interaction
         verify(userRepository, times(1)).findByFirstNameIgnoreCaseAndLastNameIgnoreCase("John", "Doe");
     }
 
-    // Add more test cases as needed
 }

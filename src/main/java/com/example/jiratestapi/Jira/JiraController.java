@@ -86,7 +86,7 @@ public class JiraController {
     }
 
 //    @Transactional
-    @PostMapping("/sync")
+    // @PostMapping("/sync")
     public List<BatchTicket> syncTickets() throws Exception {
         List<BatchTicket> batchTickets = new ArrayList<>();
         List<Project> projects = projectRepository.findAll();
@@ -170,7 +170,6 @@ public class JiraController {
                 projectRepository.save(project);
 
             }
-            // Optionally, rethrow the exception if it needs to be handled further up
         }
 
         return batchTickets;
@@ -181,56 +180,3 @@ public class JiraController {
 }
 
 
-//List<BatchTask> tickets = jiraService.fetchTickets();
-//
-//int countUpdatedTickets = 0;
-//int countCreatedTickets = 0 ;
-//
-//
-//
-//// Récupération des jiraIds des tickets obtenus depuis Jira
-//List<String> jiraIds = tickets.stream()
-//        .map(BatchTask::getJiraId)
-//        .collect(Collectors.toList());
-//
-//// Récupération des tickets existants dans la base de données qui ne sont plus présents dans Jira
-//List<BatchTask> ticketsInDatabase = ticketRepository.findAll();
-//List<BatchTask> ticketsToDelete = ticketsInDatabase.stream()
-//        .filter(ticket -> !jiraIds.contains(ticket.getJiraId()))
-//        .collect(Collectors.toList());
-//
-//// Suppression des tickets qui ne sont plus présents dans Jira
-//int countDeletedTickets = ticketsToDelete.size();
-//        System.out.println("deleted : " +countDeletedTickets);
-//        ticketRepository.deleteAll(ticketsToDelete);
-//
-//// Sauvegarde des tickets dans la base de données
-//        for (BatchTask ticket : tickets) {
-//Optional<BatchTask> existingTicket = ticketRepository.findByJiraId(ticket.getJiraId());
-//            if (existingTicket.isPresent()) {
-//// Si le ticket existe déjà, vous pouvez le mettre à jour si nécessaire
-//BatchTask ticketToUpdate = existingTicket.get();
-//                ticketToUpdate.setProject(ticket.getProject());
-//        ticketToUpdate.setTitle(ticket.getTitle());
-//        ticketToUpdate.setSummary(ticket.getSummary());
-//        ticketToUpdate.setDescription(ticket.getDescription());
-//        ticketToUpdate.setStatus(ticket.getStatus());
-//        ticketToUpdate.setCreated(ticket.getCreated());
-//        ticketToUpdate.setStoryPoints(ticket.getStoryPoints());
-//        ticketToUpdate.setAssigneeName(ticket.getAssigneeName());
-//        if (!ticketToUpdate.getUpdated().equals(ticket.getUpdated())) {
-//        ticketToUpdate.setUpdated(ticket.getUpdated());
-//countUpdatedTickets++;
-//        }
-//        ticketRepository.save(ticketToUpdate);
-//            } else {
-//                    // Si le ticket n'existe pas, le sauvegarder
-//                    ticketRepository.save(ticket);
-//countCreatedTickets++ ;
-//        }
-//        }
-//
-//        System.out.println("updated : " + countUpdatedTickets) ;
-//        System.out.println("created : " + countCreatedTickets) ;
-//
-//        return tickets;

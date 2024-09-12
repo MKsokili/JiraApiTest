@@ -27,7 +27,6 @@ public class ProjectService {
 
     private org.springframework.http.HttpHeaders createHeaders() {
         SyncAuth syncAuth=syncAuthService.getSyncAuthInstant();
-//        System.out.println("the Sync is-------------------------------------------------------------------------------------------------- :"+syncAuth);
         String auth = syncAuth.getEmail() + ":" + syncAuth.getToken();
         byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.US_ASCII));
         String authHeader = "Basic " + new String(encodedAuth);

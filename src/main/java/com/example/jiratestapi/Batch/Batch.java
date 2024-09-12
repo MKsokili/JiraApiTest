@@ -31,7 +31,7 @@ public class Batch {
     private Integer ticketsUnchanged;
     private Integer totalTicketsSync;
 
-    //add errors fields and statistiques and so
+    //add errors fields and statistiques
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<BatchTicket> batchTickets ;

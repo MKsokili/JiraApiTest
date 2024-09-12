@@ -53,10 +53,8 @@ public class BatchService {
             ticketToUpdate.setCharge(ticket.getCharge());
             ticketToUpdate.setComment(ticket.getComment());
             ticketToUpdate.setPriority(ticket.getPriority());
-            //if (!ticketToUpdate.getUpdated().equals(ticket.getUpdated())) {
             ticketToUpdate.setUpdated(ticket.getUpdated());
             if (ticket.getBatch() != null) {
-//                        ticket.getBatch().setTicketsUpdated(ticket.getBatch().getTicketsUpdated() + 1);
                 ticket.getBatch().incrementTicketsUpdated();
             }
             ticket.setAction_type(ActionType.UPDATED);
@@ -72,8 +70,6 @@ public class BatchService {
                     if (user != null) {
                         ticketToUpdate.setAssignedTo(user);
                     } else {
-//                        Project project=
-//                        System.out.println("start in err handling in update");
                         // Log the error if the assignee is not found
                         BatchError error = new BatchError(
                                 ticket.getBatch(),
@@ -90,7 +86,6 @@ public class BatchService {
         }else {
             ticket.setAction_type(ActionType.UNCHANGED);
             if (ticket.getBatch() != null) {
-//                        ticket.getBatch().setTicketsUnchanged(ticket.getBatch().getTicketsUnchanged() + 1);
                 ticket.getBatch().incrementTicketsUnchanged();
             }
         }
