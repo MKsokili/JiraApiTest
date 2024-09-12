@@ -22,6 +22,8 @@ import lombok.NoArgsConstructor;
 @Data@AllArgsConstructor@NoArgsConstructor
 public class User {
 
+    // it's just en entity that we use it to simulate the Collaborator entity in Novy Plateform
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

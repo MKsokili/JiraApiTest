@@ -76,7 +76,7 @@ public class SyncAuthService {
             return new VerifySyncResponse(syncAuth.getIsStopped(),false,syncAuth);
 
         }
-        Boolean res = checkIfConnected(syncAuth); // Handle Optional properly
+        Boolean res = checkIfConnected(syncAuth); 
         return new VerifySyncResponse(syncAuth.getIsStopped(),!syncAuth.getIsStopped()&&res, syncAuth);
     }
 }

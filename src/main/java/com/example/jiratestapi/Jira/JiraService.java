@@ -76,18 +76,7 @@ public class JiraService {
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         return response.getBody();
-                // JQL query to get issues created in the last 5 minutes
-            // SyncAuth syncAuth=syncAuthService.getSyncAuth();
 
-            //     String jql = "created >= -5m";
-            //     String fields = "comment , assignee"; // Specify the fields you need, e.g., "comment"
-            //     String url = syncAuth.getApi_url() + "/search?jql=" + "&fields=" + fields;
-        
-            //     HttpEntity<String> entity = new HttpEntity<>(createHeaders());
-            //     ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        
-            //     // Return only the body of the response
-            //     return response.getBody();
     }
 
 
@@ -137,11 +126,11 @@ public class JiraService {
 
                     // Continue with other replacements to remove formatting styles
                     cleanedDescription = cleanedDescription
-                            .replaceAll("\\*(.*?)\\*", "$1")  // Remove bold styling but keep text
-                            .replaceAll("_(.*?)_", "$1")      // Remove italic styling but keep text
-                            .replaceAll("\\+(.*?)\\+", "$1")  // Remove underline styling but keep text
-                            .replaceAll("\\{color:[^}]+\\}", "")  // Remove color styling
-                            .replaceAll("\\{[^}]+\\}", "");  // Remove any other braces content
+                            .replaceAll("\\*(.*?)\\*", "$1")  
+                            .replaceAll("_(.*?)_", "$1")      
+                            .replaceAll("\\+(.*?)\\+", "$1")  
+                            .replaceAll("\\{color:[^}]+\\}", "")  
+                            .replaceAll("\\{[^}]+\\}", ""); 
 
                     ticket.setDescription(cleanedDescription);
                 } else {

@@ -13,7 +13,6 @@ import java.util.Optional;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/projects")
-//@CrossOrigin(origins = "http://localhost:3000")
 
 public class ProjectController {
     ProjectRepository projectRepository;
@@ -67,6 +66,6 @@ public class ProjectController {
 
     @GetMapping("/getfailedbatches")
     public List<String> getFailedBatches() {
-        return projectService.getProjectNamesWithIncompleteBatches(); // Call service method
+        return projectService.getProjectNamesWithIncompleteBatches(); 
     }
 }

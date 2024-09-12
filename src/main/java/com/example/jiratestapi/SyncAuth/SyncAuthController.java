@@ -51,10 +51,10 @@ public class SyncAuthController {
             SyncAuth sync = syncAuthService.getSyncAuthInstant();
             sync.setIsStopped(false);
             syncAuthRepository.save(sync);
-            return new ResponseEntity<>(HttpStatus.OK); // Indicate success with 200 OK
+            return new ResponseEntity<>(HttpStatus.OK); 
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Indicate failure with 204 No Content
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
         }
     }
     @PostMapping("/stop")
@@ -63,10 +63,10 @@ public class SyncAuthController {
             SyncAuth sync = syncAuthService.getSyncAuthInstant();
             sync.setIsStopped(true);
             syncAuthRepository.save(sync);
-            return new ResponseEntity<>(HttpStatus.OK); // Indicate success with 200 OK
+            return new ResponseEntity<>(HttpStatus.OK); 
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Indicate failure with 204 No Content
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
         }
     }
 }

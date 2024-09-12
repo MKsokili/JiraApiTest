@@ -85,7 +85,8 @@ public class JiraController {
         return jiraService.fetchTicketsByProject(projectKey);
     }
 
-    @PostMapping("/sync")
+//    @Transactional
+    // @PostMapping("/sync")
     public List<BatchTicket> syncTickets() throws Exception {
         List<BatchTicket> batchTickets = new ArrayList<>();
         List<Project> projects = projectRepository.findAll();
@@ -94,6 +95,7 @@ public class JiraController {
             batchTickets = jiraService.fetchTickets();
 
             for (Project project : projects) {
+                System.out.println("project:" + project.getJiraKey());
                 if (project.getJiraKey() == null||!projectService.doesProjectKeyExist(project.getJiraKey())) {
                     System.out.println("the project is not valid jira key"+project.getJiraKey());
                     continue;
@@ -176,4 +178,5 @@ public class JiraController {
 
 
 }
+
 

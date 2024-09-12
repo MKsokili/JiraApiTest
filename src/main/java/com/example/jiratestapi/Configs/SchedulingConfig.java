@@ -58,7 +58,7 @@ public class SchedulingConfig {
 
     @Autowired
     private BatchTicketRepository batchTicketRepository;
-    // @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
 //    @Scheduled(cron = "0 */1 * * * ?")
     public void syncTicketsNightly() throws Exception {
@@ -102,7 +102,6 @@ public class SchedulingConfig {
             } else {
                 // Handle the case where the task repository returns null or an empty list
                 System.out.println("No tasks found in the database.");
-                // Additional handling logic can be added here if needed
             }
 
             // Récupération des jiraIds des tickets à supprimer
@@ -113,9 +112,7 @@ public class SchedulingConfig {
 
             // Suppression des tickets qui ne sont plus présents dans Jira
             int countDeletedTickets = ticketsToDelete.size();
-            System.out.println("deleted : " + countDeletedTickets);
             ticketsToDelete.forEach(task -> task.setStatus("Archived"));
-//        taskRepository.deleteAll(ticketsToDelete);
 
 
             // Sauvegarde des tickets dans la base de données
@@ -135,7 +132,7 @@ public class SchedulingConfig {
             }
 
         }else {
-            System.out.println("the sync is stopped the batch cant start");
+            System.out.println("the sync is stopped the batch can't start");
         }
     }
 }

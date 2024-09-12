@@ -52,7 +52,6 @@ public class JiraControllerTest {
     public void testSyncTickets() throws Exception {
         mockMvc = MockMvcBuilders.standaloneSetup(jiraController).build();
 
-        // Prepare test data
         BatchTicket ticket1 = new BatchTicket();
         ticket1.setProjectKey("TEST_KEY");
         ticket1.setSummary("Ticket 1");
@@ -71,19 +70,16 @@ public class JiraControllerTest {
 
         List<BatchTicket> ticketsList = new ArrayList<>();
 
-        // Mocking service and repository methods
         when(jiraService.fetchTickets()).thenReturn(batchTickets);
         when(projectRepository.findAll()).thenReturn(projects);
         when(taskRepository.findAllByProjectIdAndStatusNot(1L , "Archived")).thenReturn(new ArrayList<>());
 
-        // Perform the request and assert the response
         mockMvc.perform(post("/sync"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].summary").value("Ticket 1"))
                 .andExpect(jsonPath("$[1].summary").value("Ticket 2"));
 
-        // Verify interactions
         verify(batchRepository).save(org.mockito.Mockito.any(Batch.class));
         verify(projectRepository).save(org.mockito.Mockito.any(Project.class));
     }

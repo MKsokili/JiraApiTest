@@ -33,7 +33,7 @@ public class BatchTicket {
 
     private LocalDateTime created;
     private LocalDateTime updated;
-    private String assigneeName; //Changement de champ pour inclure le nom de l'assignee
+    private String assigneeName; 
 
     private Double charge;
 
