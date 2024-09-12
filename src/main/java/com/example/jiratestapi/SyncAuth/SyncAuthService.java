@@ -61,12 +61,9 @@ public class SyncAuthService {
             if (response != null && response.getStatusCode() == HttpStatus.OK) {
                 return true; // Credentials are valid
             } else {
-                // Handle invalid credentials or other issues
-                System.err.println("Failed to connect: " + (response != null ? response.getStatusCode() : "No response") + " " + (response != null ? response.getBody() : ""));
                 return false;
             }
         } catch (RestClientException e) {
-            // Log the exception for debuggingSystem.err.println("Exception occurred while connecting: " + e.getMessage());
             return false;
         }
     }
