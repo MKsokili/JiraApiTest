@@ -45,6 +45,7 @@ public class JiraController {
     private ProjectService projectService;
     private BatchRepository batchRepository;
     private BatchErrorRepository batchErrorRepository;
+
     @GetMapping("/create")
     public ResponseEntity<String> createIssue(){
         try{
@@ -57,7 +58,9 @@ public class JiraController {
         }
 
     }
-    @GetMapping("/get")
+
+
+    @GetMapping("/lastfivemintickets")
     public ResponseEntity<Object> getLastIssues(){
         try{
            Object jira= jiraService.getIssuesCreatedInLastFiveMinutes();
@@ -70,19 +73,26 @@ public class JiraController {
 
     }
 
+
+    // method to get mapped tickets from jira
+
     @GetMapping("/tickets")
     public List<BatchTicket> getTickets() throws Exception {
         return jiraService.fetchTickets();
     }
 
 
+    // Fetching by Project 
 
     @GetMapping("/fetchByProject/{projectKey}")
     public List<BatchTicket> getMyProjectTickets(@PathVariable String projectKey) throws Exception {
         return jiraService.fetchTicketsByProject(projectKey);
     }
 
-        public List<BatchTicket> syncTickets() throws Exception {
+
+    // Sync tickets method that we use in syncronisation process ; this is the principal method in this class
+
+    public List<BatchTicket> syncTickets() throws Exception {
         List<BatchTicket> batchTickets = new ArrayList<>();
         List<Project> projects = projectRepository.findAll();
         List<String> keys =new ArrayList<>();

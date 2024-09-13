@@ -68,17 +68,20 @@ public class JiraService {
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
         return response.getStatusCode() == HttpStatus.CREATED ? response.getBody() : "Error creating issue: " + response.getStatusCode();
     }
+
     public Object getIssuesCreatedInLastFiveMinutes() {
         // JQL query to get issues created in the last 5 minutes
         String jql = "created >= -5m";
         SyncAuth syncAuth=syncAuthService.getSyncAuthInstant();
-        String url = syncAuth.getApiUrl()+ "/rest/api/2/search?jql=";
+        String url = syncAuth.getApiUrl()+ "/rest/api/2/search?jql=" +jql;
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         return response.getBody();
 
     }
 
+
+    // Principal method in this Service class that help us to get mapped tickets from jira
 
     public List<BatchTicket> fetchTickets() throws Exception {
         SyncAuth syncAuth = syncAuthService.getSyncAuthInstant();
