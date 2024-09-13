@@ -55,7 +55,6 @@ public class ProjectService {
 
 
 
-    // Method to check if a project key exists
     public boolean doesProjectKeyExist(String projectKey) throws Exception {
         SyncAuth syncAuth=syncAuthService.getSyncAuthInstant();
         String urlString = syncAuth.getApiUrl()+"/rest/api/2/project";
@@ -66,7 +65,6 @@ public class ProjectService {
 
         ResponseEntity<String> response = restTemplate.exchange(urlString, HttpMethod.GET, entity, String.class);
         String responseBody = response.getBody();
-//        System.out.println(responseBody);
         JSONArray projects = new JSONArray(responseBody);
 
         for (int i = 0; i < projects.length(); i++) {
@@ -81,10 +79,7 @@ public class ProjectService {
     public Response getJiraKey(Long projectId) throws Exception {
         Optional<Project> project=projectRepository.findById(projectId);
         String jiraKey=project.get().getJiraKey();
-        boolean existsInJira = doesProjectKeyExist(jiraKey);// to delete later because we can get the validity from the database while it is stored => it is valid 4
-        //the case where it will fail is where you change the jira key directly from the database  which is not logic
-
-
+        boolean existsInJira = doesProjectKeyExist(jiraKey);
         return new Response(project.get().getIsValid()&&existsInJira,jiraKey);
     }
     public List<String> getProjectNamesWithIncompleteBatches() {

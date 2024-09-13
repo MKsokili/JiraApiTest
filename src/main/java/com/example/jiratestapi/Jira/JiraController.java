@@ -85,9 +85,7 @@ public class JiraController {
         return jiraService.fetchTicketsByProject(projectKey);
     }
 
-//    @Transactional
-    // @PostMapping("/sync")
-    public List<BatchTicket> syncTickets() throws Exception {
+        public List<BatchTicket> syncTickets() throws Exception {
         List<BatchTicket> batchTickets = new ArrayList<>();
         List<Project> projects = projectRepository.findAll();
         List<String> keys =new ArrayList<>();
@@ -148,8 +146,7 @@ public class JiraController {
             batchTickets.removeIf(e -> !keys.contains(e.getProjectKey()));
 
         } catch (Exception e) {
-            // Handle the exception and log it to BatchError
-
+            
             for (Project project : projects) {
                 if (project.getJiraKey() == null||!project.getIsValid()) {
                     continue;

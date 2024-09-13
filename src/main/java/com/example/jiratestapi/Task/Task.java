@@ -50,7 +50,6 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "assigned_to_id")
     @JsonIgnoreProperties(value = {"tasks"})
-//    @JsonBackReference
     private User assignedTo;
 
 

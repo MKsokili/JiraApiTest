@@ -31,11 +31,11 @@ public class Project {
     List<Task> issues;
     public void addBatch(Batch batch) {
         batches.add(batch);
-        batch.setProject(this);  // Correction ici
+        batch.setProject(this);  
     }
     public boolean hasIncompleteBatch() {
         if (batches == null || batches.isEmpty()) {
-            return false; // No batches, so nothing to check
+            return false; 
         }
         return !batches.get(batches.size() - 1).getIsCompleted();
     }

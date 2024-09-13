@@ -40,8 +40,7 @@ public class BatchError {
         this.message = message;
         this.jiraId = taskId;
     }
-    // Getters and setters
-
+    
     @PrePersist
     protected void onCreate() {
         this.timestamp = LocalDateTime.now();

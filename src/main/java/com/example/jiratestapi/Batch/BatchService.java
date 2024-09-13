@@ -63,15 +63,14 @@ public class BatchService {
             if (displayName != null) {
                 String[] names = displayName.split(" ");
                 if (names.length >= 2) {
-                    String firstName = names[0]; // Le premier mot est toujours le prénom
+                    String firstName = names[0]; 
                     // Combine tous les mots après le premier pour former le nom de famille
                     String lastName = String.join(" ", Arrays.copyOfRange(names, 1, names.length));
                     User user = userRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
                     if (user != null) {
                         ticketToUpdate.setAssignedTo(user);
                     } else {
-                        // Log the error if the assignee is not found
-                        BatchError error = new BatchError(
+                                                BatchError error = new BatchError(
                                 ticket.getBatch(),
                                 ErrorType.ASSIGNEE_NOT_FOUND,
                                 "Assignee (" + displayName + ") not found for ticket: " + ticket.getJiraKey(),
@@ -102,7 +101,6 @@ public class BatchService {
             Project project = optionalProject.get();
             ticketToCreate.setProject(project);
         }
-//        ticketToCreate.setProject(prjct);
         ticketToCreate.setJiraId(ticket.getJiraId());
         ticketToCreate.setJiraKey(ticket.getJiraKey());
         ticketToCreate.setSummary(ticket.getSummary());
@@ -116,7 +114,6 @@ public class BatchService {
         ticketToCreate.setComment(ticket.getComment());
         ticketToCreate.setPriority(ticket.getPriority());
         if (ticket.getBatch() != null) {
-//                    ticket.getBatch().setTicketsCreated(ticket.getBatch().getTicketsCreated() + 1);
             ticket.getBatch().incrementTicketsCreated();
         }
         ticket.setAction_type(ActionType.CREATED);
@@ -146,8 +143,7 @@ public class BatchService {
             }
         }
 
-        // Save the ticket
-        taskRepository.save(ticketToCreate);
+                taskRepository.save(ticketToCreate);
     }
     public List<Task> getValidJiraidsFromDataBase(){
         List<Task> ticketsInDatabase = taskRepository.findAll();

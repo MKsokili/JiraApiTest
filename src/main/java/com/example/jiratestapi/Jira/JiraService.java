@@ -104,7 +104,7 @@ public class JiraService {
                 // Check the issue type and skip bugs
                 String issueType = issue.get("fields").get("issuetype").get("name").asText();
                 if (issueType.equalsIgnoreCase("Bug")) {
-                    continue; // Skip this iteration if the issue type is "Bug"
+                    continue; 
                 }
 
                 BatchTicket ticket = new BatchTicket();
@@ -238,8 +238,7 @@ public class JiraService {
         ticket.setCreated(created);
         ticket.setUpdated(updated);
 
-        // Récupération de l'email de l'assignee
-        // Vérification et récupération de l'email de l'assignee
+       
         if (issue.get("fields").has("assignee") && !issue.get("fields").get("assignee").isNull()) {
             JsonNode assigneeNode = issue.get("fields").get("assignee");
             if (assigneeNode.has("emailAddress") && !assigneeNode.get("emailAddress").isNull()) {
