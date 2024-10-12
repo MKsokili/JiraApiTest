@@ -14,7 +14,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/batchTickets")
-@CrossOrigin(origins = "http://localhost:3000")
 public class BatchTicketController {
 
     @Autowired

@@ -23,14 +23,17 @@ public class BatchTicket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String jiraId;
+    private String jiraKey;
     private String projectKey;
     private String summary;
+
+    @Column(length = 1500)
     private String description;
     private String status;
 
     private LocalDateTime created;
     private LocalDateTime updated;
-    private String assigneeName; //Changement de champ pour inclure le nom de l'assignee
+    private String assigneeName; 
 
     private Double charge;
 

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/connection")
 public class SyncAuthController {
     private SyncAuthService syncAuthService;
+    private SyncAuthRepository syncAuthRepository;
 
     @PostMapping("/set")
     public ResponseEntity<Boolean> Connect(@RequestBody SyncAuth authReq){
@@ -32,13 +33,40 @@ public class SyncAuthController {
     @GetMapping ("/verify")
     public ResponseEntity<VerifySyncResponse> VerifyConnect(){
         try {
+            SyncAuth sync=syncAuthService.getSyncAuthInstant();
             VerifySyncResponse response= syncAuthService.verifyIfConnected();
+            sync.setIsConnected(response.getIsConnected());
+            syncAuthRepository.save(sync);
             return new ResponseEntity<>(response,HttpStatus.OK);
         }catch (Exception e){
             e.printStackTrace();
-            return new ResponseEntity<>(new VerifySyncResponse(false,null),HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(new VerifySyncResponse(false,false,null),HttpStatus.NO_CONTENT);
 
         }
 
+    }
+    @PostMapping("/activate")
+    public ResponseEntity<Void> activateSync() {
+        try {
+            SyncAuth sync = syncAuthService.getSyncAuthInstant();
+            sync.setIsStopped(false);
+            syncAuthRepository.save(sync);
+            return new ResponseEntity<>(HttpStatus.OK); 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+        }
+    }
+    @PostMapping("/stop")
+    public ResponseEntity<Void> stopSync() {
+        try {
+            SyncAuth sync = syncAuthService.getSyncAuthInstant();
+            sync.setIsStopped(true);
+            syncAuthRepository.save(sync);
+            return new ResponseEntity<>(HttpStatus.OK); 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+        }
     }
 }

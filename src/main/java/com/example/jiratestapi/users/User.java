@@ -3,6 +3,7 @@ package com.example.jiratestapi.users;
 import java.util.List;
 
 import com.example.jiratestapi.Task.Task;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.annotation.Generated;
@@ -21,6 +22,7 @@ import lombok.NoArgsConstructor;
 @Data@AllArgsConstructor@NoArgsConstructor
 public class User {
 
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

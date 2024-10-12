@@ -1,6 +1,5 @@
 package com.example.jiratestapi.Batch;
 
-import com.example.jiratestapi.BatchTicket.BatchTicket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +16,5 @@ public interface BatchRepository extends JpaRepository<Batch, Long> {
         List<Batch> findByProject(Project project);
 
     Optional<Batch> findByProjectAndStartedDate(Project project, LocalDate batchDate);
+    Optional<Batch> findFirstByStartedDate(LocalDate startDate);
 }

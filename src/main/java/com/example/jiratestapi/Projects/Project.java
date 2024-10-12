@@ -21,15 +21,22 @@ public class Project {
     private Long id;
     private String jiraKey;
     private String name;
+    private Boolean isValid;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private  List<Batch> batches;
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project" , cascade = CascadeType.ALL ,   fetch = FetchType.LAZY)
     @JsonManagedReference
     List<Task> issues;
     public void addBatch(Batch batch) {
         batches.add(batch);
-        batch.setProject(this);  // Correction ici
+        batch.setProject(this);  
+    }
+    public boolean hasIncompleteBatch() {
+        if (batches == null || batches.isEmpty()) {
+            return false; 
+        }
+        return !batches.get(batches.size() - 1).getIsCompleted();
     }
 }
